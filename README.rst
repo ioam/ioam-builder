@@ -8,4 +8,6 @@ building documention and running tests. The three branches are:
 
 * ``docbuilder``: Code to build Sphinx documentation and website
 
-* ``testrunner``: Code to run tests including notebook tests
+* ``testrunner``: Code to run common types of test
+
+* ``ipynb``: Code for testing and publishing IPython notebooks
