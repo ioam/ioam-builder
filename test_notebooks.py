@@ -3,8 +3,6 @@ import os, sys
 import subprocess
 import json, glob
 
-from collections import OrderedDict
-
 
 class NotebookFinder(object):
     """
@@ -72,17 +70,18 @@ class NotebookFinder(object):
         Using the expanded spec, find all the specified notebooks,
         filtering by the specified suites (if specified).
         """
-        files = OrderedDict()
+        files = []
         for project, group in spec.items():
             selection = [s for s in suites if s in group]
             selection = selection if suites else group.keys()
             for suite in selection:
                 key = (str(project), str(suite))
-                files[key] = []
+                group_list = []
                 for relpath in group[suite]:
                     pattern = os.path.join(root_dirs[project], relpath)
                     for match in glob.glob(pattern):
-                         files[key].append(str(match))
+                        group_list.append(str(match))
+                files.append((key, group_list))
         return files
 
 
@@ -130,7 +129,7 @@ if __name__ == '__main__':
         raise Exception("No test directory: %s" % test_dir)
 
     retcode = 0
-    for (project, suite), paths in finder.files.items():
+    for (project, suite), paths in finder.files:
         for path in paths:
             switch_reference_branch(ref_dir, project)
             retcode |= run_notebook_test(path, project, suite, ref_dir, test_dir)
