@@ -90,7 +90,7 @@ def switch_reference_branch(ref_dir, project):
     # Not yet implemented...
     pass
 
-def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True, regen=False):
+def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
 
     test_script = os.path.join(os.getcwd(),'nbtest.py')
 
@@ -98,10 +98,6 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True,
     if not notebook_name.endswith('.ipynb'):
         print("Not an IPython notebook (%s)...skipping." % notebook_name)
         return 0
-
-    if verbose:
-        print("Testing %s project [%s]. Notebook: %s" % (project, suite, path))
-        print("Reference data goes: %s Test data goes: %s" % (ref_dir, test_dir))
 
     py_version =  "_py%d" % sys.version_info[0]
     ref_dir = os.path.join(ref_dir, project + '_' + notebook_name[:-6] + py_version)
