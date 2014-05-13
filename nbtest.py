@@ -302,7 +302,8 @@ class Configure(object):
         msg = self.generate_data_files(ip, notebook, ref_dir, data_dir, regen)
         # Compare files as unit tests
         if msg is False:
-            msg = 'Could not find reference directory %s and regeneration is disabled.' % ref_dir
+            ref_basename = os.path.basename(ref_dir)
+            msg = "Could not find reference directory '%s' (regeneration disabled)" % ref_basename
         else:
             msg += self.set_nose_methods(notebook, ref_dir, data_dir)
 
