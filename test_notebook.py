@@ -65,13 +65,15 @@ from IPython import get_ipython
 from IPython.display import clear_output
 from IPython.nbformat import current
 
-from utils import IPTestCase
+# Dataviews is required. This is only a temporary fix.
+sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
+
+from dataviews.tests.utils import IPTestCase
 from dataviews import ipython
 
 from nose.plugins.skip import SkipTest
 
 
-ARCHIVE_REF = False  # Whether or not to zip/unzip the reference data
 CLEANUP_DATA = False # Whether to delete the generated test data when complete
 
 
@@ -82,10 +84,8 @@ class NBTester(IPTestCase):
     """
     @classmethod
     def tearDownClass(cls):
-        if ARCHIVE_REF:
-            shutil.rmtree(NB_PATH[:-6]+'_reference')
         if CLEANUP_DATA:
-            shutil.rmtree(NB_PATH[:-6])
+            shutil.rmtree(TEST_PATH[:-6])
 
 
 class Capture(object):
@@ -190,10 +190,10 @@ class NBRunner(object):
     Run the code cells of a notebook and save their return values
     (possibly including display representation) to disk.
     """
-    def __init__(self, shell, name, nb, data_dir, reference=False):
+    def __init__(self, shell, name, nb, output_dir, reference=False):
         self.nb = nb
         self.shell = shell
-        self.data_dir = data_dir
+        self.output_dir = output_dir
         self.reference = reference
 
         self.code_cells = self.get_code_cells(nb)
@@ -253,7 +253,7 @@ class NBRunner(object):
 
             # Save object data (and code executed)
             if object_data is not None:
-                pickle_path = os.path.join(self.data_dir, 'data_%03d.pkl' %
+                pickle_path = os.path.join(self.output_dir, 'data_%03d.pkl' %
                                            self.capture.counter['data'])
                 filelist.append(pickle_path)
                 with open(pickle_path,'w') as f:
@@ -262,7 +262,7 @@ class NBRunner(object):
 
             # Save object display data (and code executed)
             if display_data is not None or print_output!='':
-                html_path = os.path.join(self.data_dir, 'display_%03d.html'
+                html_path = os.path.join(self.output_dir, 'display_%03d.html'
                                          % self.capture.counter['display'])
                 filelist.append(html_path)
                 title = ('<b>[Display %d]</b></br></br>' % self.capture.counter['display'])
@@ -276,14 +276,8 @@ class NBRunner(object):
         while self.capture.wait:
              time.sleep(1)
 
-        # Archive generated reference data as appropriate.
-        if self.reference and ARCHIVE_REF:
-            zipf = zipfile.ZipFile("%s.zip" % self.data_dir, 'w')
-            for f in filelist:
-                zipf.write(f, os.path.basename(f))
 
-            shutil.rmtree(self.data_dir)
-
+        # shutil.rmtree(self.output_dir)
 
 
 class Configure(object):
@@ -292,7 +286,8 @@ class Configure(object):
     files (reference and/or test data) and finally build unit tests
     (that nose can find) on NBTester.
     """
-    def __init__(self, notebook):
+    def __init__(self, notebook, ref_dir, data_dir):
+
         ip = get_ipython()   # Get IPython instance (if possible)
         if ip is None: raise SkipTest("No IPython")
         # Booleans cannot be silenced (or captured normally)!
@@ -300,8 +295,10 @@ class Configure(object):
         ipython.load_ipython_extension(ip, verbose=False)
         ip.run_cell("%config PromptManager.out_template = '"+ prompt+"'", silent=True)
 
-        msg = self.generate_data_files(ip, notebook)  # Create test pickle/ html files
-        msg += self.set_nose_methods(notebook)        # Compare files as unit tests
+        # Create test pickle/ html files
+        msg = self.generate_data_files(ip, notebook, ref_dir, data_dir)
+        # Compare files as unit tests
+        msg += self.set_nose_methods(notebook, ref_dir, data_dir)
 
         # Display message
         if msg.strip():
@@ -343,15 +340,16 @@ class Configure(object):
         return data_comparison
 
 
-    def set_nose_methods(self, notebook):
+    def set_nose_methods(self, notebook, ref_dir, test_dir):
         """
         Dynamically create all test methods that nosetests can find
         and execute.
         """
         report_msg = ''
         nb_name = os.path.basename(notebook).rsplit('.')[0]
-        data_paths, ref_paths, msg = self.match_files(notebook)
+        data_paths, ref_paths, msg = self.match_files(notebook, ref_dir, test_dir)
         report_msg += msg
+
         # Zipped data/reference file paths for testing
         for (data_path, ref_path) in zip(data_paths, ref_paths):
             basename = os.path.basename(data_path).rsplit('.')[0]
@@ -361,23 +359,19 @@ class Configure(object):
         return report_msg
 
 
-    def generate_data_files(self, ip, notebook):
+    def generate_data_files(self, ip, notebook, ref_dir, data_dir):
         """
         Generate both testand new reference data (if needed) using
         NBRunner.
         """
         msg =''
-        # Find the data directory (create it if necessary)
-        nb_dir, name = os.path.split(notebook)
-        basename = name.rsplit('.ipynb')[0]
-        data_dir = os.path.join(nb_dir, basename)
-        ref_dir= data_dir + '_reference'
+
+        basename = os.path.split(notebook)[1].rsplit('.ipynb')[0]
         nb = current.read(open(notebook,'r'), 'ipynb')
+
         # Reference data not found - regenerate it and exit
-        archive = not os.path.isfile(ref_dir + '.zip')
-        missing_dir =  not os.path.isdir(ref_dir)
-        if (not archive and ARCHIVE_REF) or (missing_dir and not ARCHIVE_REF):
-            if not os.path.isdir(ref_dir): os.mkdir(ref_dir)
+        if not os.path.isdir(ref_dir):
+            os.mkdir(ref_dir)
             reference_runner =  NBRunner(ip, basename, nb, ref_dir, reference=True)
             reference_runner.run()
             return ''
@@ -385,58 +379,44 @@ class Configure(object):
         # Remove any pre-existing test data.
         if os.path.isdir(data_dir):
             shutil.rmtree(data_dir)
+
         # Generate the test data
         os.mkdir(data_dir)
         NBRunner(ip, basename, nb, data_dir, reference=False).run()
         return msg
 
 
-    def unzip_data(self, data_dir):
-        """
-        Decompress reference data zip archive.
-        """
-        archive = data_dir + '_reference.zip'
-        unpack_dir = data_dir + '_reference'
-        if os.path.isfile(archive):
-            if os.path.isdir(unpack_dir):
-                shutil.rmtree(unpack_dir)
-            os.makedirs(unpack_dir)
-            zfile = zipfile.ZipFile(archive)
-            for name in zfile.namelist():
-                (_, filename) = os.path.split(name)
-                zfile.extract(name, unpack_dir)
 
-
-    def match_files(self, notebook):
+    def match_files(self, notebook, ref_dir, data_dir):
         """
         Given a set of test files in the data directory, look up the
         corresponding files in reference directory and generate
         warnings about any mismatches.
         """
-        nb_dir, name = os.path.split(notebook)
-        basename = name.rsplit('.ipynb')[0]
-        data_dir = os.path.join(nb_dir, basename)
         # Find the test data files (if they exist at all)
         if not os.path.isdir(data_dir):
             data_files = []
         else:
             data_files = [f for f in sorted(os.listdir(data_dir))
                           if f.endswith('.pkl') or f.endswith('.html')]
+
         # Find the reference files
-        if ARCHIVE_REF: self.unzip_data(data_dir)
-        ref_files = [f for f in sorted(os.listdir(data_dir + '_reference'))
+        ref_files = [f for f in sorted(os.listdir(ref_dir))
                      if f.endswith('.pkl') or f.endswith('.html')]
+
+
         # For each data file, look up the corresponding reference file
         data_paths, ref_paths, msg = [], [], ''
         for data_file in data_files:
             data_path = os.path.join(data_dir, data_file)
-            ref_path = os.path.join(data_dir + '_reference', data_file)
+            ref_path = os.path.join(ref_dir,   data_file)
 
             if not os.path.isfile(ref_path):
                 msg += "No reference file found for %s\n" % data_file
             else:
                 data_paths.append(data_path)
                 ref_paths.append(ref_path)
+
         # Message about references files that were not looked up
         unused = set(ref_files) - set(data_files)
         if unused:
@@ -448,13 +428,19 @@ class Configure(object):
 # Set up tests for the specified notebook #
 #=========================================#
 
-if len (sys.argv) == 2:
-    NB_PATH = os.path.abspath(sys.argv[1])
-    Configure(NB_PATH)
+
+
+if len (sys.argv) == 4:
+
+    (notebook, ref_dir, data_dir) = sys.argv[1:]
+    REF_DIR = os.path.abspath(ref_dir)
+    DATA_DIR = os.path.abspath(data_dir)
+
+    Configure(os.path.abspath(notebook), REF_DIR, DATA_DIR)
     sys.stderr.write('\nDynamically generated tests: %s\n'
                      % ', '.join(sorted(el for el in dir(NBTester) if el.startswith('test_'))))
 else:
-    raise Exception("Run as follows: ipython notebook_test.py <notebook_path>")
+    raise Exception("Run as follows: ipython notebook_test.py <notebook_path> <ref_dir> <test_dir>")
 
 
 if __name__ == '__main__':
