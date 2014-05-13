@@ -92,7 +92,7 @@ def switch_reference_branch(ref_dir, project):
 
 def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True, regen=False):
 
-    test_script = os.path.join(os.getcwd(),'test_notebook.py')
+    test_script = os.path.join(os.getcwd(),'nbtest.py')
 
     notebook_name =  os.path.split(notebook)[1]
     if not notebook_name.endswith('.ipynb'):

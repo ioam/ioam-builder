@@ -461,9 +461,9 @@ else:
 
 if __name__ == '__main__':
     """
-    Run to test a single notebook as follows:
+    Test a single notebook as follows:
 
-    $ ipython notebook_test.py Demo.ipynb
+    $ ipython nbtest.py [-h] notebook ref_dir data_dir regen
     """
     import nose
     sys.argv = sys.argv[:1] # Stop nose consuming notebook path
