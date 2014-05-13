@@ -15,7 +15,7 @@ class NotebookFinder(object):
         # Assuming file in doc/nbpublisher
         root = os.path.abspath(os.path.join('..','..'))
         # Get current project name from spec
-        project = [k for k in spec.keys() if k != 'list'][0]
+        project = [k for k in spec.keys() if k != 'links'][0]
         # If not projects specified, test current project
         projects = [project] if not projects else projects
         # Dictionary of root directories by project
