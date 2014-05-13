@@ -6,7 +6,7 @@ import json, glob
 
 class NotebookFinder(object):
     """
-    Given the path to a notebook.tests JSON file, locate the notebooks
+    Given the path to a notebook.json file, locate the notebooks
     given the supplied command-line options (projects and suites).
     """
 
@@ -49,9 +49,9 @@ class NotebookFinder(object):
         return root_dirs
 
 
-    def expand_spec(self, spec, root_dirs, location=['doc', 'notebook.tests']):
+    def expand_spec(self, spec, root_dirs, location=['doc', 'notebook.json']):
         """
-        Follow the links to other notebook.tests files to create an
+        Follow the links to other notebook.json files to create an
         expanded specification dictionary with all the projects to
         test.
         """
@@ -90,7 +90,7 @@ def switch_reference_branch(ref_dir, project):
     # Not yet implemented...
     pass
 
-def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True):
+def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True, regen=False):
 
     test_script = os.path.join(os.getcwd(),'test_notebook.py')
 
@@ -99,27 +99,42 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True)
         print("Not an IPython notebook (%s)...skipping." % notebook_name)
         return 0
 
-    if verbose and False:
+    if verbose:
         print("Testing %s project [%s]. Notebook: %s" % (project, suite, path))
         print("Reference data goes: %s Test data goes: %s" % (ref_dir, test_dir))
 
-    ref_dir = os.path.join(ref_dir, project + '_' + notebook_name[:-6])
-    test_dir = os.path.join(test_dir, project + '_' + notebook_name[:-6])
+    py_version =  "_py%d" % sys.version_info[0]
+    ref_dir = os.path.join(ref_dir, project + '_' + notebook_name[:-6] + py_version)
+    test_dir = os.path.join(test_dir, project + '_' + notebook_name[:-6] + py_version)
 
-    cmds = ['ipython', test_script, notebook, ref_dir, test_dir]
+    cmds = ['ipython', test_script, notebook, ref_dir, test_dir, str(regen)]
     proc = subprocess.Popen(cmds,
                             stderr=subprocess.PIPE,
                             cwd=os.path.split(path)[0])
     _,stderr = proc.communicate()
-    print(str(stderr))
+    print(str(stderr.decode()))
     if str(stderr.splitlines()[-1]).startswith('FAILED'):
         return 1
     else:
         return proc.returncode
 
 if __name__ == '__main__':
+    import argparse
 
-    finder = NotebookFinder('../notebook.tests', projects=['imagen', 'dataviews'], suites=['fast'])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('projects', nargs='*', default=[])
+    parser.add_argument('-s', '--suites', nargs='*', default=[])
+    parser.add_argument('-p', '--paths', nargs='*')
+    parser.add_argument('-r', '--regen', action="store_true")
+    args = parser.parse_args()
+
+    if args.paths is not None:
+        assert len(args.projects) == 1
+        file_list = [((args.projects[0], "custom"), args.paths)]
+    else:
+        file_list = NotebookFinder('../notebook.json', projects=args.projects,
+                                   suites=args.suites).files
+
     ref_dir = os.path.abspath(os.path.join('..','reference_data'))
     test_dir = os.path.abspath(os.path.join('..','test_data'))
 
@@ -129,8 +144,8 @@ if __name__ == '__main__':
         raise Exception("No test directory: %s" % test_dir)
 
     retcode = 0
-    for (project, suite), paths in finder.files:
+    for (project, suite), paths in file_list:
         for path in paths:
             switch_reference_branch(ref_dir, project)
-            retcode |= run_notebook_test(path, project, suite, ref_dir, test_dir)
+            retcode |= run_notebook_test(path, project, suite, ref_dir, test_dir, regen=args.regen)
     sys.exit(retcode)

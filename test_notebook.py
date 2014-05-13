@@ -289,7 +289,7 @@ class Configure(object):
     files (reference and/or test data) and finally build unit tests
     (that nose can find) on NBTester.
     """
-    def __init__(self, notebook, ref_dir, data_dir):
+    def __init__(self, notebook, ref_dir, data_dir, regen=False):
 
         ip = get_ipython()   # Get IPython instance (if possible)
         if ip is None: raise SkipTest("No IPython")
@@ -299,9 +299,12 @@ class Configure(object):
         ip.run_cell("%config PromptManager.out_template = '"+ prompt+"'", silent=True)
 
         # Create test pickle/ html files
-        msg = self.generate_data_files(ip, notebook, ref_dir, data_dir)
+        msg = self.generate_data_files(ip, notebook, ref_dir, data_dir, regen)
         # Compare files as unit tests
-        msg += self.set_nose_methods(notebook, ref_dir, data_dir)
+        if msg is False:
+            msg = 'Could not find reference directory %s and regeneration is disabled.' % ref_dir
+        else:
+            msg += self.set_nose_methods(notebook, ref_dir, data_dir)
 
         # Display message
         if msg.strip():
@@ -362,7 +365,7 @@ class Configure(object):
         return report_msg
 
 
-    def generate_data_files(self, ip, notebook, ref_dir, data_dir):
+    def generate_data_files(self, ip, notebook, ref_dir, data_dir, regen):
         """
         Generate both testand new reference data (if needed) using
         NBRunner.
@@ -373,11 +376,14 @@ class Configure(object):
         nb = current.read(open(notebook,'r'), 'ipynb')
 
         # Reference data not found - regenerate it and exit
-        if not os.path.isdir(ref_dir):
+        if regen:
+            if os.path.isdir(ref_dir): shutil.rmtree(ref_dir)
             os.mkdir(ref_dir)
             reference_runner =  NBRunner(ip, basename, nb, ref_dir, reference=True)
             reference_runner.run()
             return ''
+        elif not os.path.isdir(ref_dir):
+            return False
 
         # Remove any pre-existing test data.
         if os.path.isdir(data_dir):
@@ -431,15 +437,22 @@ class Configure(object):
 # Set up tests for the specified notebook #
 #=========================================#
 
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('notebook', type=str)
+parser.add_argument('ref_dir',  type=str)
+parser.add_argument('data_dir', type=str)
+parser.add_argument('regen', type=str)
+args = parser.parse_args()
+regen = True if args.regen == 'True' else False
 
-if len (sys.argv) == 4:
+NB_FILE = os.path.abspath(args.notebook)
 
-    (notebook, ref_dir, data_dir) = sys.argv[1:]
-    REF_DIR = os.path.abspath(ref_dir)
-    DATA_DIR = os.path.abspath(data_dir)
-
-    Configure(os.path.abspath(notebook), REF_DIR, DATA_DIR)
+if os.path.isfile(NB_FILE) and args.ref_dir and args.data_dir:
+    REF_DIR = os.path.abspath(args.ref_dir)
+    DATA_DIR = os.path.abspath(args.data_dir)
+    Configure(NB_FILE, REF_DIR, DATA_DIR, regen)
     sys.stderr.write('\nDynamically generated tests: %s\n'
                      % ', '.join(sorted(el for el in dir(NBTester) if el.startswith('test_'))))
 else:
