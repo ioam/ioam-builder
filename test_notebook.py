@@ -54,7 +54,10 @@ Limitations
 """
 
 import sys, os, pickle,  shutil, time, zipfile
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except:
+    from io import StringIO
 
 # Standardize backend due to random inconsistencies
 from matplotlib import pyplot
@@ -75,7 +78,7 @@ from nose.plugins.skip import SkipTest
 
 
 CLEANUP_DATA = False # Whether to delete the generated test data when complete
-
+PICKLE_PROTOCOL = 2
 
 class NBTester(IPTestCase):
     """
@@ -256,8 +259,8 @@ class NBRunner(object):
                 pickle_path = os.path.join(self.output_dir, 'data_%03d.pkl' %
                                            self.capture.counter['data'])
                 filelist.append(pickle_path)
-                with open(pickle_path,'w') as f:
-                    pickle.dump((object_data, cell), f)
+                with open(pickle_path,'wb') as f:
+                    pickle.dump((object_data, cell), f, PICKLE_PROTOCOL)
                 self.capture.counter['data'] += 1
 
             # Save object display data (and code executed)
@@ -318,9 +321,9 @@ class Configure(object):
             # Load reference and test data
             test_code, ref_code = None, None
             if data_path.endswith('.pkl'):
-                with open(data_path,'r') as data_file:
+                with open(data_path,'rb') as data_file:
                     test_data, test_code = pickle.load(data_file)
-                with open(ref_path,'r') as ref_file:
+                with open(ref_path,'rb') as ref_file:
                     ref_data,  ref_code =  pickle.load(ref_file)
                 kwargs = {}
             elif data_path.endswith('.html'):
@@ -333,8 +336,8 @@ class Configure(object):
             # Show the code at the point of inconsistent results
             except AssertionError as e:
                 if test_code:
-                    print "Code cell executed:\n   %s" %           '\n   '.join(test_code.splitlines())
-                    print "Reference code cell executed:\n   %s" % '\n   '.join(ref_code.splitlines())
+                    print("Code cell executed:\n   %s" %           '\n   '.join(test_code.splitlines()))
+                    print("Reference code cell executed:\n   %s" % '\n   '.join(ref_code.splitlines()))
                 raise e
 
         return data_comparison

@@ -112,8 +112,8 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, verbose=True)
                             stderr=subprocess.PIPE,
                             cwd=os.path.split(path)[0])
     _,stderr = proc.communicate()
-    print stderr
-    if stderr.splitlines()[-1].startswith('FAILED'):
+    print(str(stderr))
+    if str(stderr.splitlines()[-1]).startswith('FAILED'):
         return 1
     else:
         return proc.returncode
