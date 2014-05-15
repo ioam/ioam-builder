@@ -454,8 +454,13 @@ if os.path.isfile(NB_FILE) and args.ref_dir and args.data_dir:
     REF_DIR = os.path.abspath(args.ref_dir)
     DATA_DIR = os.path.abspath(args.data_dir)
     Configure(NB_FILE, REF_DIR, DATA_DIR, regen)
-    sys.stderr.write('\nDynamically generated tests: %s\n'
-                     % ', '.join(sorted(el for el in dir(NBTester) if el.startswith('test_'))))
+
+    data_test_count = len([el for el in dir(NBTester)
+                           if el.startswith('test') and el.split('_')[-2] == 'data'])
+    display_test_count = len([el for el in dir(NBTester)
+                           if el.startswith('test') and el.split('_')[-2] == 'display'])
+    sys.stderr.write('\nDynamically generated tests: %d data tests, %d display tests\n'
+                     % (data_test_count, display_test_count))
 else:
     raise Exception("Run as follows: ipython notebook_test.py <notebook_path> <ref_dir> <test_dir>")
 
