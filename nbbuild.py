@@ -150,7 +150,7 @@ def nb_to_html(nb_path):
 
     # http://imgur.com/eR9bMRH
     header = header.replace('<style', '<style scoped="scoped"')
-    header = header.replace('body {\n  overflow: visible;\n  padding: 0px;\n}\n', '')
+    header = header.replace('body {\n  overflow: visible;\n  padding: 8px;\n}\n', '')
 
     # Filter out styles that conflict with the sphinx theme.
     filter_strings = [
