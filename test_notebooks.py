@@ -13,7 +13,7 @@ class NotebookFinder(object):
     def __init__(self, spec_path, projects=[], suites=[]):
         spec = json.load(open(spec_path, 'r'))
         # Assuming file in doc/nbpublisher
-        root = os.path.abspath(os.path.join('..','..'))
+        root = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
         # Get current project name from spec
         project = [k for k in spec.keys() if k != 'links'][0]
         # If not projects specified, test current project
@@ -91,8 +91,8 @@ def switch_reference_branch(ref_dir, project):
     pass
 
 def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
-
-    test_script = os.path.join(os.getcwd(),'nbtest.py')
+    path, filename = os.path.split(__file__)
+    test_script = os.path.abspath(os.path.join(path, 'nbtest.py'))
 
     notebook_name =  os.path.split(notebook)[1]
     if not notebook_name.endswith('.ipynb'):
@@ -106,7 +106,7 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
     cmds = ['ipython', test_script, notebook, ref_dir, test_dir, str(regen)]
     proc = subprocess.Popen(cmds,
                             stderr=subprocess.PIPE,
-                            cwd=os.path.split(path)[0])
+                            cwd=os.path.split(notebook)[0])
     _,stderr = proc.communicate()
     print(str(stderr.decode()))
     if str(stderr.splitlines()[-1]).startswith('FAILED'):
@@ -131,8 +131,8 @@ if __name__ == '__main__':
         file_list = NotebookFinder('../notebook.json', projects=args.projects,
                                    suites=args.suites).files
 
-    ref_dir = os.path.abspath(os.path.join('..','reference_data'))
-    test_dir = os.path.abspath(os.path.join('..','test_data'))
+    ref_dir = os.path.abspath(os.path.join(__file__, '..', '..','reference_data'))
+    test_dir = os.path.abspath(os.path.join(__file__, '..', '..','test_data'))
 
     if not os.path.isdir(ref_dir):
         raise Exception("No reference directory: %s" % ref_dir)
