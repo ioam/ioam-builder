@@ -55,10 +55,10 @@ class NotebookDirective(Directive):
         source_dir = os.path.dirname(
             os.path.abspath(self.state.document.current_source))
         project = self.arguments[0].lower()
-        nb_basename = os.path.basename(self.arguments[1])
         rst_file = self.state_machine.document.attributes['source']
         rst_dir = os.path.abspath(os.path.dirname(rst_file))
-        nb_abs_path = os.path.join(rst_dir, nb_basename)
+        nb_abs_path = os.path.abspath(os.path.join(rst_dir, self.arguments[1]))
+        nb_filepath, nb_basename = os.path.split(nb_abs_path)
 
         filepath, filename = os.path.split(__file__)
         ref_dir = os.path.abspath(os.path.join(filepath, '..', 'reference_data'))
