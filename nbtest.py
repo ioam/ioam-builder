@@ -121,7 +121,7 @@ class Capture(object):
         self.display_data = None
         obj = self.shell.user_ns.get('_')
         # Necessary in case the extension is reloaded
-        ipython.render_anim = ipython.middle_frame
+        ipython.display_hooks.render_anim = ipython.display_hooks.middle_frame
         self.shell.display_formatter.format(obj)[0]['text/plain']
         # Only set if bool and no captured via displayhook
         if self.object_data is None and isinstance(obj, bool):
