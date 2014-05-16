@@ -1,4 +1,4 @@
-import os, sys, shutil, glob, re
+import os, sys, shutil, glob
 
 STATIC_DIR = '_static'
 MAKEFILE = 'Makefile'
