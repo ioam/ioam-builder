@@ -56,7 +56,10 @@ def generate_module_rst(module, submodules):
         for submodule in submodules:
             sub_text += "* `%s <%s-module.html>`_\n" % (submodule, submodule)
     text = str.replace(text, "__submodules__", sub_text)
-    rst_path = os.path.join(refman, module + "-module.rst")
+    rst_path = os.path.abspath(os.path.join(__file__, '..', '..', refman))
+    if not os.path.isdir(rst_path): os.mkdir(rst_path)
+    rst_path = os.path.join(rst_path, module + "-module.rst")
+
     with open(rst_path, "w") as f:
         f.write(text)
 
