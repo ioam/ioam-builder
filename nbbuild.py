@@ -52,8 +52,6 @@ class NotebookDirective(Directive):
             raise self.warning('"%s" directive disabled.' % self.name)
 
         # get path to notebook
-        source_dir = os.path.dirname(
-            os.path.abspath(self.state.document.current_source))
         project = self.arguments[0].lower()
         rst_file = self.state_machine.document.attributes['source']
         rst_dir = os.path.abspath(os.path.dirname(rst_file))
@@ -72,7 +70,6 @@ class NotebookDirective(Directive):
         
         # Move files around.
         rel_dir = os.path.relpath(rst_dir, setup.confdir)
-        rel_path = os.path.join(rel_dir, nb_basename)
         dest_dir = os.path.join(setup.app.builder.outdir, rel_dir)
         dest_path = os.path.join(dest_dir, nb_basename)
 
@@ -88,10 +85,9 @@ class NotebookDirective(Directive):
         dest_path_eval = string.replace(dest_path, '.ipynb', '_evaluated.ipynb')
         dest_path_script = string.replace(dest_path, '.ipynb', '.py')
         rel_path_eval = string.replace(nb_basename, '.ipynb', '_evaluated.ipynb')
-        rel_path_script = string.replace(nb_basename, '.ipynb', '.py')
 
-        # Create python script vesion
-        unevaluated_text = nb_to_html(nb_abs_path)
+        # Create python script version
+        nb_to_html(nb_abs_path)
 
         script_text = nb_to_python(nb_abs_path)
         f = open(dest_path_script, 'w')
@@ -122,8 +118,6 @@ class NotebookDirective(Directive):
 
         # clean up png files left behind by notebooks.
         png_files = glob.glob("*.png")
-        fits_files = glob.glob("*.fits")
-        h5_files = glob.glob("*.h5")
         for file in png_files:
             os.remove(file)
 
@@ -225,7 +219,7 @@ def setup(app):
 
 
 if __name__ == '__main__':
-    import argparse, os, sys
+    import argparse, sys
     path, filename = os.path.split(__file__)
     sys.path.append(os.path.abspath(path))
     sys.path.append(os.path.abspath(os.path.join("..", "..")))

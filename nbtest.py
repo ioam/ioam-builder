@@ -53,7 +53,7 @@ Limitations
 * There needs to be cleaner way to achieve all this!
 """
 
-import sys, os, pickle,  shutil, time, zipfile
+import sys, os, pickle,  shutil, time
 try:
     from StringIO import StringIO
 except:
@@ -88,7 +88,7 @@ class NBTester(IPTestCase):
     @classmethod
     def tearDownClass(cls):
         if CLEANUP_DATA:
-            shutil.rmtree(TEST_PATH[:-6])
+            shutil.rmtree(DATA_DIR[:-6])
 
 
 class Capture(object):
