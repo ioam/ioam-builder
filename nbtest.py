@@ -119,7 +119,9 @@ class Capture(object):
         """
         self.object_data = None
         self.display_data = None
-        obj = self.shell.user_ns.get('_')
+
+        prompt = '_%d' % (self.counter['code'] + 2)
+        obj = self.shell.user_ns.get(prompt, None)
         # Necessary in case the extension is reloaded
         ipython.display_hooks.render_anim = ipython.display_hooks.middle_frame
         self.shell.display_formatter.format(obj)[0]['text/plain']
@@ -227,7 +229,7 @@ class NBRunner(object):
         """
         stdout_handle =  sys.stdout
         sys.stdout = buff
-        self.shell.run_cell(cell)
+        self.shell.run_cell(cell, store_history=True)
         buff.flush()
         buff.seek(seekpos)
         print_output = buff.read()[:]
@@ -245,11 +247,11 @@ class NBRunner(object):
         seekpos = 0
         filelist = []
         for i, cell in enumerate(self.code_cells):
-            self.object_data = None
-            self.display_data = None
+            self.capture.object_data = None
+            self.capture.display_data = None
 
             print_output, seekpos = self.run_cell(cell, buff, seekpos)
-            self.capture.counter['code'] += 1 # Cell has been run
+            self.capture.counter['code'] = i # Cell has been run
 
             object_data = self.capture.object_data
             display_data = self.capture.display_data
@@ -275,7 +277,7 @@ class NBRunner(object):
                 self.capture.counter['display'] += 1
 
         # Signal that the last cell has executed (wait till it has)
-        self.shell.run_cell('"__EXECUTION_TERMINATED__"')
+        self.shell.run_cell('"__EXECUTION_TERMINATED__"', store_history=True)
         while self.capture.wait:
              time.sleep(1)
 
