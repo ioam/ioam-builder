@@ -73,6 +73,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
 
 from dataviews.tests.utils import IPTestCase
 from dataviews import ipython
+from dataviews.ipython import magics
 
 from nose.plugins.skip import SkipTest
 
@@ -208,6 +209,8 @@ class NBRunner(object):
         else:
             self.shell.events.register('post_run_cell', self.capture.post_execute)
 
+        # Store history to capture styled output with post_execute hook
+        magics.STORE_HISTORY = True
 
 
     def get_code_cells(self, nb):
@@ -221,7 +224,7 @@ class NBRunner(object):
         return code_cells
 
 
-    def run_cell(self, cell, buff, seekpos):
+    def run_cell(self, cell, buff, seekpos, silent=False):
         """
         Run a code cell and capture the output to stdout. Requires a
         StringIO buffer and the current seekpos (which is updated in
@@ -229,7 +232,8 @@ class NBRunner(object):
         """
         stdout_handle =  sys.stdout
         sys.stdout = buff
-        self.shell.run_cell(cell, store_history=True)
+        store_history = False if silent else True
+        self.shell.run_cell(cell, store_history=store_history, silent=silent)
         buff.flush()
         buff.seek(seekpos)
         print_output = buff.read()[:]
@@ -250,7 +254,13 @@ class NBRunner(object):
             self.capture.object_data = None
             self.capture.display_data = None
 
-            print_output, seekpos = self.run_cell(cell, buff, seekpos)
+            # Cell magics also call run_cell, which would cause
+            # post-execute hooks to be called twice and result in bad
+            # behavior
+            silent = False
+            if cell.strip().startswith('%%'):
+                silent = True
+            print_output, seekpos = self.run_cell(cell, buff, seekpos, silent=silent)
             self.capture.counter['code'] = i # Cell has been run
 
             object_data = self.capture.object_data
