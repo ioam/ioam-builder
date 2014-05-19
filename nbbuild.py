@@ -51,13 +51,22 @@ class NotebookDirective(Directive):
         if not self.state.document.settings.raw_enabled:
             raise self.warning('"%s" directive disabled.' % self.name)
 
-        # get path to notebook
+        # Process paths and directories
         project = self.arguments[0].lower()
-        rst_file = self.state_machine.document.attributes['source']
-        rst_dir = os.path.abspath(os.path.dirname(rst_file))
+        rst_file = os.path.abspath(self.state.document.current_source)
+        rst_dir = os.path.dirname(rst_file)
         nb_abs_path = os.path.abspath(os.path.join(rst_dir, self.arguments[1]))
         nb_filepath, nb_basename = os.path.split(nb_abs_path)
 
+        rel_dir = os.path.relpath(rst_dir, setup.confdir)
+        rel_path = os.path.join(rel_dir, nb_basename)
+        dest_dir = os.path.join(setup.app.builder.outdir, rel_dir)
+        dest_path = os.path.join(dest_dir, nb_basename)
+
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+
+        # Run notebook tests
         filepath, filename = os.path.split(__file__)
         ref_dir = os.path.abspath(os.path.join(filepath, '..', 'reference_data'))
         test_dir = os.path.abspath(os.path.join(filepath, '..', 'test_data'))
@@ -67,44 +76,47 @@ class NotebookDirective(Directive):
         if retcode:
             raise RuntimeError("%s does not pass test. Please fix the notebook"
                                "or update the reference data." % nb_basename)
+        # Process file inclusion options
+        include_opts = self.arguments[2:]
+        include_nb = True if 'ipynb' in include_opts else False
+        include_eval = True if 'eval' in include_opts else False
+        include_script = True if 'py' in include_opts else False
+
+        link_rst = ''
+        if len(include_opts):
+            link_rst = 'Direct Downloads: ('
         
-        # Move files around.
-        rel_dir = os.path.relpath(rst_dir, setup.confdir)
-        dest_dir = os.path.join(setup.app.builder.outdir, rel_dir)
-        dest_path = os.path.join(dest_dir, nb_basename)
+        if include_nb:
+            link_rst += formatted_link(nb_basename) + '; '
 
-        if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir)
+        if include_eval:
+            dest_path_eval = string.replace(dest_path, '.ipynb', '_evaluated.ipynb')
+            rel_path_eval = string.replace(nb_basename, '.ipynb', '_evaluated.ipynb')
+            link_rst += formatted_link(rel_path_eval) + ('; ' if include_py else '')
+        else:
+            dest_path_eval = os.path.join(dest_dir, 'temp_evaluated.ipynb')
 
-        # Copy unevaluated script
-        try:
-            shutil.copyfile(nb_abs_path, dest_path)
-        except IOError:
-            raise RuntimeError("Unable to copy notebook to build destination.")
+        if include_script:
+            dest_path_script = string.replace(dest_path, '.ipynb', '.py')
+            rel_path_script = string.replace(nb_basename, '.ipynb', '.py')
+            script_text = nb_to_python(nb_abs_path)
+            f = open(dest_path_script, 'w')
+            f.write(script_text.encode('utf8'))
+            f.close()
+ 
+            link_rst += formatted_link(rel_path_script)
 
-        dest_path_eval = string.replace(dest_path, '.ipynb', '_evaluated.ipynb')
-        dest_path_script = string.replace(dest_path, '.ipynb', '.py')
-        rel_path_eval = string.replace(nb_basename, '.ipynb', '_evaluated.ipynb')
+        if len(include_opts):
+            link_rst = ')'
 
-        # Create python script version
-        nb_to_html(nb_abs_path)
-
-        script_text = nb_to_python(nb_abs_path)
-        f = open(dest_path_script, 'w')
-        f.write(script_text.encode('utf8'))
-        f.close()
-
+        # Evaluate Notebook and insert into Sphinx doc
         skip_exceptions = 'skip_exceptions' in self.options
 
         evaluated_text = evaluate_notebook(nb_abs_path, dest_path_eval,
                                            skip_exceptions=skip_exceptions)
 
-        # Create link to notebook and script files
-        link_rst = "(" + \
-                   formatted_link(nb_basename) + "; " + \
-                   formatted_link(rel_path_eval) + \
-                   ")"
-
+        # Insert evaluated notebook HTML into Sphinx
+        
         self.state_machine.insert_input([link_rst], rst_file)
 
         # create notebook node
