@@ -14,7 +14,7 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext refmanual ipynb-rst clean-ipynb-rst
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -152,33 +152,28 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
-
 publish-ipynb:
-	python ./nbpublisher/nbpublish.py IOAMPROJECT_lower
+	python nbpublisher/nbpublish.py $(MODULE)
 
 buildbot-publish-ipynb:
-	python ./nbpublisher/nbpublish.py IOAMPROJECT_lower NO_PROMPT
+	python nbpublisher/nbpublish.py $(MODULE) NO_PROMPT
 	@echo "Committed static notebooks to IOAM."
 
 ipynb-rst:
-	python ./nbpublisher/nbpagebuild.py
+	python nbpublisher/nbpagebuild.py
 	@echo "Created RST for documented notebooks."
 
 clean-ipynb-rst:
-	ls Tutorials/*.rst|grep -v index.rst|xargs rm -rf
+	- ls ./Tutorials/*.rst |grep -v index.rst| xargs rm -rf
 	@echo "Cleaned Notebook RST files."
 
-clean-shared:
-	rm _static/custom.css _static/custom.js
-	rm _templates/page.html
-	rm Makefile
-
 refmanual:
-	python ./builder/manualgen.py IOAMPROJECT_lower
+	python ./builder/generate_modules.py $(MODULE) -d ./Reference_Manual -n $(PROJECT)
 	@echo "Build finished for reference manual."
 
 clean-refmanual:
-	- rm ./Reference_Manual/IOAMPROJECT_lower*
+	- rm ./Reference_Manual/$(MODULE)*
+	- rm ./Reference_Manual/modules.rst
 	@echo "Cleaned reference manual files."
 
 clean-rst: clean-refmanual clean-ipynb-rst
