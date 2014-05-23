@@ -168,7 +168,7 @@ clean-ipynb-rst:
 	@echo "Cleaned Notebook RST files."
 
 refmanual:
-	python ./builder/generate_modules.py $(MODULE) -d ./Reference_Manual -n $(PROJECT)
+	python ./builder/generate_modules.py $(MODULE) -d ./Reference_Manual -n $(PROJECT) -e tests
 	@echo "Build finished for reference manual."
 
 clean-refmanual:
