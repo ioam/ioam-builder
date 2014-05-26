@@ -48,7 +48,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram'
 ]
 
-inheritance_graph_attrs = dict(rankdir="LR", size='"8.0, 10.0"', fontsize=20)
+inheritance_graph_attrs = dict(rankdir="LR", size='"20.0, 20.0"', fontsize=24)
 
 default_edge_attrs = {
         'arrowsize': 1.0,
@@ -107,6 +107,11 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'nature'
+
+# Add any paths that contain custom static files (such as style sheets) here,
+# relative to this directory. They are copied after the builtin static files,
+# so a file named "default.css" will overwrite the builtin "default.css".
+html_static_path = ['_static', 'builder/_shared_static']
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
