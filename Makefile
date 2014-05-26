@@ -42,6 +42,7 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 html:
+	mkdir -p ./_static
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
@@ -168,6 +169,7 @@ clean-ipynb-rst:
 	@echo "Cleaned Notebook RST files."
 
 refmanual:
+	- mkdir -p Reference_Manual
 	python ./builder/generate_modules.py $(MODULE) -d ./Reference_Manual -n $(PROJECT) -e tests
 	@echo "Build finished for reference manual."
 
