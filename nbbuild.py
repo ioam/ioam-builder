@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import os, shutil, string, glob, re
+import os, string, glob, re
 
 from sphinx.util.compat import Directive
 from docutils import nodes
@@ -59,7 +59,6 @@ class NotebookDirective(Directive):
         nb_filepath, nb_basename = os.path.split(nb_abs_path)
 
         rel_dir = os.path.relpath(rst_dir, setup.confdir)
-        rel_path = os.path.join(rel_dir, nb_basename)
         dest_dir = os.path.join(setup.app.builder.outdir, rel_dir)
         dest_path = os.path.join(dest_dir, nb_basename)
 
@@ -92,7 +91,7 @@ class NotebookDirective(Directive):
         if include_eval:
             dest_path_eval = string.replace(dest_path, '.ipynb', '_evaluated.ipynb')
             rel_path_eval = string.replace(nb_basename, '.ipynb', '_evaluated.ipynb')
-            link_rst += formatted_link(rel_path_eval) + ('; ' if include_py else '')
+            link_rst += formatted_link(rel_path_eval) + ('; ' if include_script else '')
         else:
             dest_path_eval = os.path.join(dest_dir, 'temp_evaluated.ipynb')
 
