@@ -313,6 +313,10 @@ class Configure(object):
 
         # Create test pickle/ html files
         msg = self.generate_data_files(ip, notebook, ref_dir, data_dir, regen)
+        if regen:
+            sys.stderr.write("\n%s\n" % msg)
+            return
+
         # Compare files as unit tests
         if msg is False:
             ref_basename = os.path.basename(ref_dir)
