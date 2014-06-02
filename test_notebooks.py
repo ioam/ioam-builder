@@ -140,7 +140,7 @@ if __name__ == '__main__':
         raise Exception("No test directory: %s" % test_dir)
 
     retcode = 0
-    for (project, suite), paths in file_list:
+    for (project, suite), paths in sorted(file_list):
         for path in paths:
             switch_reference_branch(ref_dir, project)
             retcode |= run_notebook_test(path, project, suite, ref_dir, test_dir, regen=args.regen)
