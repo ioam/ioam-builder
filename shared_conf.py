@@ -48,7 +48,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram'
 ]
 
-inheritance_graph_attrs = dict(rankdir="LR", size='"20.0, 20.0"', fontsize=24)
+inheritance_graph_attrs = dict(rankdir="LR", size='"12.0, 12.0"', fontsize=18)
 
 default_edge_attrs = {
         'arrowsize': 1.0,
