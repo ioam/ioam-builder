@@ -109,10 +109,10 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
                             cwd=os.path.split(notebook)[0])
     _,stderr = proc.communicate()
     print(str(stderr.decode()))
-    if str(stderr.splitlines()[-1]).startswith('FAILED'):
-        return 1
-    else:
-        return proc.returncode
+    for line in stderr.splitlines()[-10:]:
+        if str(line).startswith('FAILED (failures='):
+            return 1
+    return proc.returncode
 
 if __name__ == '__main__':
     import argparse
