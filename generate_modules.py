@@ -8,6 +8,12 @@ creates ReST files appropriately to create code documentation with Sphinx.
 It also creates a modules index (named modules.<suffix>).
 """
 
+
+# This is a customized version of the script by Thomas Waldman. It has since
+# become a part of Sphinx (apidoc), which is under the GPL license. After
+# contacting Thomas Waldman, we have explicit permission to include this
+# file under the BSD license.
+
 # Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
 # Copyright 2010 Thomas Waldmann <tw AT waldmann-edv DOT de>
 # All rights reserved.
