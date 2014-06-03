@@ -71,10 +71,9 @@ from IPython.nbformat import current
 # Dataviews is required. This is only a temporary fix.
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
 
-from tests.utils import IPTestCase
-
 from dataviews import ipython
 from dataviews.ipython import magics
+from dataviews.testing import IPTestCase
 
 from nose.plugins.skip import SkipTest
 
