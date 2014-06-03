@@ -164,10 +164,6 @@ ipynb-rst:
 	python nbpublisher/nbpagebuild.py
 	@echo "Created RST for documented notebooks."
 
-clean-ipynb-rst:
-	- ls ./Tutorials/*.rst |grep -v index.rst| xargs rm -rf
-	@echo "Cleaned Notebook RST files."
-
 refmanual:
 	- mkdir -p Reference_Manual
 	python ./builder/generate_modules.py $(MODULE) -d ./Reference_Manual -n $(PROJECT) -e tests
@@ -178,8 +174,6 @@ clean-refmanual:
 	- rm ./Reference_Manual/modules.rst
 	@echo "Cleaned reference manual files."
 
-clean-rst: clean-refmanual clean-ipynb-rst
+html-doc: clean-refmanual clean refmanual ipynb-rst html publish-ipynb
 
-html-doc: clean-rst clean refmanual ipynb-rst html publish-ipynb
-
-buildbot-html-doc: clean-rst clean refmanual ipynb-rst html buildbot-publish-ipynb
+buildbot-html-doc: clean-refmanual clean refmanual ipynb-rst html buildbot-publish-ipynb
