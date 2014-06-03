@@ -201,7 +201,7 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False):
     write(nb_runner.nb, open(dest_path, 'w'), 'json')
 
     ret = nb_to_html(dest_path)
-    if dest_path is 'temp_evaluated.ipynb':
+    if dest_path.endswith('temp_evaluated.ipynb'):
         os.remove(dest_path)
     return ret
 
