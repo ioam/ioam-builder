@@ -174,6 +174,6 @@ clean-refmanual:
 	- rm ./Reference_Manual/modules.rst
 	@echo "Cleaned reference manual files."
 
-html-doc: clean-refmanual clean refmanual ipynb-rst html publish-ipynb
+html-doc: clean-refmanual clean refmanual html
 
-buildbot-html-doc: clean-refmanual clean refmanual ipynb-rst html buildbot-publish-ipynb
+ipynb-doc: ipynb-rst html buildbot-publish-ipynb
