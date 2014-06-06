@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import os, sys
+import shutil
 import subprocess
 import json, glob
 
@@ -102,6 +103,7 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
     py_version =  "_py%d" % sys.version_info[0]
     ref_dir = os.path.join(ref_dir, project + '_' + notebook_name[:-6] + py_version)
     test_dir = os.path.join(test_dir, project + '_' + notebook_name[:-6] + py_version)
+    if regen and os.path.isdir(ref_dir):  shutil.rmtree(ref_dir)
 
     cmds = ['ipython', test_script, notebook, ref_dir, test_dir, str(regen)]
     proc = subprocess.Popen(cmds,
