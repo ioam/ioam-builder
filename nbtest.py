@@ -75,7 +75,11 @@ except: pass
 
 from dataviews import ipython
 from dataviews.ipython import magics
-from dataviews.testing import IPTestCase
+
+try:
+    from topo.analysis import TopoIPTestCase as IPTestCase
+except:
+    from dataviews.testing import IPTestCase
 
 from nose.plugins.skip import SkipTest
 
