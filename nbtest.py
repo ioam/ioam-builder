@@ -70,7 +70,7 @@ from IPython.nbformat import current
 
 # Dataviews is required. This is only a temporary fix.
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
-try:    import external
+try:    import external  # pyflakes:ignore (Needed for imports)
 except: pass
 
 from dataviews import ipython
