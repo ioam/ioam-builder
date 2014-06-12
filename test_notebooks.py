@@ -111,8 +111,10 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
                             cwd=os.path.split(notebook)[0])
     _,stderr = proc.communicate()
     print(str(stderr.decode()))
-    for line in stderr.splitlines()[-10:]:
-        if str(line).startswith('FAILED (failures='):
+    for idx, line in enumerate(stderr.splitlines()[-10:]):
+        error = 'FAILED (errors=' in str(line)
+        failure = 'FAILED (failures=' in str(line)
+        if error or failure:
             return 1
     return proc.returncode
 
