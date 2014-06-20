@@ -53,7 +53,7 @@ Limitations
 * There needs to be cleaner way to achieve all this!
 """
 
-import sys, os, pickle,  shutil, time
+import sys, os, pickle,  shutil, time, fnmatch
 try:
     from StringIO import StringIO
 except:
@@ -86,6 +86,13 @@ from nose.plugins.skip import SkipTest
 
 CLEANUP_DATA = False # Whether to delete the generated test data when complete
 PICKLE_PROTOCOL = 2
+
+# A list of patterns that if matched cause printed output to be
+# ignored (i.e. not saved as a display data file).
+
+DISPLAY_IGNORE = [
+    'creating *_intermediate/compiler_*'
+    ]
 
 class NBTester(IPTestCase):
     """
@@ -271,6 +278,10 @@ class NBRunner(object):
 
             object_data = self.capture.object_data
             display_data = self.capture.display_data
+
+            # Ignore print output if it matches an ignore pattern
+            if any(fnmatch.fnmatch(print_output, pat) for pat in DISPLAY_IGNORE):
+                print_output = ''
 
             # Save object data (and code executed)
             if object_data is not None:
