@@ -97,16 +97,6 @@ DISPLAY_LINES_IGNORE = [
     '* restored from bytecode into *'
     ]
 
-class NBTester(IPTestCase):
-    """
-    Tester class used by nosetests. Test methods dynamically generated
-    from notebook data.
-    """
-    @classmethod
-    def tearDownClass(cls):
-        if CLEANUP_DATA:
-            shutil.rmtree(DATA_DIR[:-6])
-
 
 class Capture(object):
     """
@@ -269,7 +259,6 @@ class NBRunner(object):
         for i, cell in enumerate(self.code_cells):
             self.capture.object_data = None
             self.capture.display_data = None
-
             # Cell magics also call run_cell, which would cause
             # post-execute hooks to be called twice and result in bad
             # behavior
@@ -328,29 +317,44 @@ class Configure(object):
     """
     def __init__(self, notebook, ref_dir, data_dir, regen=False):
 
-        ip = get_ipython()   # Get IPython instance (if possible)
-        if ip is None: raise SkipTest("No IPython")
+        self.notebook = notebook
+        self.ref_dir = ref_dir
+        self.data_dir = data_dir
+        self.regen = regen
+
+        self.ip = get_ipython()   # Get IPython instance (if possible)
+        if self.ip is None: raise SkipTest("No IPython")
         # Booleans cannot be silenced (or captured normally)!
         prompt = "[Unsilenceable Boolean (ignore)]"
-        ipython.load_ipython_extension(ip, verbose=False)
-        ip.run_cell("%config PromptManager.out_template = '"+ prompt+"'", silent=True)
+        ipython.load_ipython_extension(self.ip, verbose=False)
+        self.ip.run_cell("%config PromptManager.out_template = '"+ prompt+"'", silent=True)
 
+
+    def generate_data(self):
         # Create test pickle/ html files
-        msg = self.generate_data_files(ip, notebook, ref_dir, data_dir, regen)
-        if regen:
-            sys.stderr.write("\n%s\n" % msg)
-            return
-
-        # Compare files as unit tests
-        if msg is False:
-            ref_basename = os.path.basename(ref_dir)
-            msg = "Could not find reference directory '%s' (regeneration disabled)" % ref_basename
+        self.msg = self.generate_data_files(self.ip,
+                                            self.notebook,
+                                            self.ref_dir,
+                                            self.data_dir,
+                                            self.regen)
+        if self.regen:
+            sys.stderr.write("\n%s\n" % self.msg)
+            return False
         else:
-            msg += self.set_nose_methods(notebook, ref_dir, data_dir)
+            return True
+
+    def create_test_methods(self):
+        # Compare files as unit tests
+        if self.msg is False:
+            ref_basename = os.path.basename(self.ref_dir)
+            self.msg = "Could not find reference directory '%s' (regeneration disabled)" % ref_basename
+        else:
+
+            self.msg += self.set_nose_methods(self.notebook, self.ref_dir, self.data_dir)
 
         # Display message
-        if msg.strip():
-            sys.stderr.write("\n%s\n" % msg)
+        if self.msg.strip():
+            sys.stderr.write("\n%s\n" % self.msg)
 
 
     def compare_files(self, data_path, ref_path):
@@ -491,11 +495,27 @@ regen = True if args.regen == 'True' else False
 
 NB_FILE = os.path.abspath(args.notebook)
 
+create_tests = False
 if os.path.isfile(NB_FILE) and args.ref_dir and args.data_dir:
     REF_DIR = os.path.abspath(args.ref_dir)
     DATA_DIR = os.path.abspath(args.data_dir)
-    Configure(NB_FILE, REF_DIR, DATA_DIR, regen)
+    configuration = Configure(NB_FILE, REF_DIR, DATA_DIR, regen)
+    create_tests = configuration.generate_data()
 
+
+class NBTester(IPTestCase):
+    """
+    Tester class used by nosetests. Test methods dynamically generated
+    from notebook data.
+    """
+    @classmethod
+    def tearDownClass(cls):
+        if CLEANUP_DATA:
+            shutil.rmtree(DATA_DIR[:-6])
+
+
+if create_tests:
+    configuration.create_test_methods()
     data_test_count = len([el for el in dir(NBTester)
                            if el.startswith('test') and el.split('_')[-2] == 'data'])
     display_test_count = len([el for el in dir(NBTester)
