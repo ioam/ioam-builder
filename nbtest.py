@@ -225,7 +225,7 @@ class NBRunner(object):
         """
         code_cells = []
         for i, cell in enumerate(nb.worksheets[0].cells):
-            if cell.cell_type == 'code':
+            if cell.cell_type == 'code' and cell.input!='':
                 code_cells.append(cell.input)
         return code_cells
 
