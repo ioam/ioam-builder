@@ -90,11 +90,11 @@ from nose.plugins.skip import SkipTest
 CLEANUP_DATA = False # Whether to delete the generated test data when complete
 PICKLE_PROTOCOL = 2
 
-# A list of patterns that if matched cause printed output to be
-# ignored (i.e. not saved as a display data file).
-
-DISPLAY_IGNORE = [
-    'creating *_intermediate/compiler_*'
+# A list of patterns - if a line matches any of these patterns, that
+# line will be dropped from the printed display output
+DISPLAY_LINES_IGNORE = [
+    'creating *_intermediate/compiler_*',
+    '* restored from bytecode into *'
     ]
 
 class NBTester(IPTestCase):
@@ -283,8 +283,13 @@ class NBRunner(object):
             display_data = self.capture.display_data
 
             # Ignore print output if it matches an ignore pattern
-            if any(fnmatch.fnmatch(print_output, pat) for pat in DISPLAY_IGNORE):
-                print_output = ''
+            print_output_lines =[]
+            for line in print_output.split("\n"):
+                ignore = any(fnmatch.fnmatch(line, pat) for pat in DISPLAY_LINES_IGNORE)
+                if not ignore:
+                    print_output_lines.append(line)
+
+            print_output = "\n".join(print_output_lines)
 
             # Save object data (and code executed)
             if object_data is not None:
