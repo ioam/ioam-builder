@@ -78,9 +78,6 @@ from dataviews.ipython import magics
 
 try:
     from topo.analysis import TopoIPTestCase as IPTestCase
-    from topo.misc.commandline import default_output_path
-    import param
-    param.resolve_path.search_paths.append(default_output_path())
 except:
     from dataviews.testing import IPTestCase
 
