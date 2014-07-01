@@ -178,11 +178,6 @@ html_static_path = ['_static', 'builder/_shared_static']
 # of the sidebar.
 #html_logo = None
 
-# The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-#html_favicon = None
-
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
