@@ -94,7 +94,8 @@ PICKLE_PROTOCOL = 2
 # line will be dropped from the printed display output
 DISPLAY_LINES_IGNORE = [
     'creating *_intermediate/compiler_*',
-    '* restored from bytecode into *'
+    '* restored from bytecode into *',
+    'Executing user startup file *'
     ]
 
 
