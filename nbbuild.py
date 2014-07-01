@@ -84,7 +84,7 @@ class NotebookDirective(Directive):
         link_rst = ''
         if len(include_opts):
             link_rst = 'Direct Downloads: ('
-        
+
         if include_nb:
             link_rst += formatted_link(nb_basename) + '; '
 
@@ -102,7 +102,7 @@ class NotebookDirective(Directive):
             f = open(dest_path_script, 'w')
             f.write(script_text.encode('utf8'))
             f.close()
- 
+
             link_rst += formatted_link(rel_path_script)
 
         if len(include_opts):
@@ -115,7 +115,7 @@ class NotebookDirective(Directive):
                                            skip_exceptions=skip_exceptions)
 
         # Insert evaluated notebook HTML into Sphinx
-        
+
         self.state_machine.insert_input([link_rst], rst_file)
 
         # create notebook node
@@ -242,7 +242,7 @@ if __name__ == '__main__':
 
     dest_path = os.paths.abspath(args.dest) if args.dest else None
     skip = args.skip
-    for nbpath in args.nbpaths:   
+    for nbpath in args.nbpaths:
         nbpath = os.path.abspath(nbpath)
         with open(nbpath[:-6] + '.html', 'w') as f:
             nb_html = evaluate_notebook(nbpath, dest_path=dest_path, skip_exceptions=skip)
