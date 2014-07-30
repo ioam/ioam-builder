@@ -235,6 +235,7 @@ class NBRunner(object):
         the returned tuple).
         """
         stdout_handle =  sys.stdout
+        buff.encoding = sys.stdout.encoding
         sys.stdout = buff
         store_history = False if silent else True
         self.shell.run_cell(cell, store_history=store_history, silent=silent)
