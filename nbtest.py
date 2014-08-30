@@ -57,7 +57,28 @@ import sys, os, pickle,  shutil, time, fnmatch
 try:
     from StringIO import StringIO
 except:
-    from io import StringIO
+    from io import StringIO as cStringIO
+
+    class StringIO(cStringIO):
+        """
+        IPython + Python 3 is perfectly broken combination:
+
+        1) IPython offers no decent tools to test notebooks.
+
+        2) The IPython pager checks the 'encoding' attribute of sys.stdout.
+
+        3) In Python 3 io.StringIO is implemented in C so the
+          'encoding' attribute cannot be set.
+
+        This unfortunate hack is necessary to capture stdout from
+        notebooks, including any use of the IPython pager.
+         """
+        _encoding = None
+
+    @property
+    def encoding(self):
+        return self._encoding
+
 
 # Standardize backend due to random inconsistencies
 from matplotlib import pyplot
@@ -235,7 +256,10 @@ class NBRunner(object):
         the returned tuple).
         """
         stdout_handle =  sys.stdout
-        buff.encoding = sys.stdout.encoding
+        if hasattr(buff, '_encoding'):
+            buff._encoding = sys.stdout.encoding
+        else:
+            buff.encoding = sys.stdout.encoding
         sys.stdout = buff
         store_history = False if silent else True
         self.shell.run_cell(cell, store_history=store_history, silent=silent)
