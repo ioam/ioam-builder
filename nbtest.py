@@ -94,13 +94,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
 try:    import external  # pyflakes:ignore (Needed for imports)
 except: pass
 
-from dataviews import ipython
-from dataviews.ipython import magics
+from holoviews import ipython
+from holoviews.ipython import magics
 
 try:
     from topo.analysis import TopoIPTestCase as IPTestCase
 except:
-    from dataviews.testing import IPTestCase
+    from holoviews.testing import IPTestCase
 
 from nose.plugins.skip import SkipTest
 
