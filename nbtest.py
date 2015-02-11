@@ -576,8 +576,6 @@ if create_tests:
                            if el.startswith('test') and el.split('_')[-2] == 'display'])
     sys.stderr.write('\nDynamically generated tests: %d data tests, %d display tests\n'
                      % (data_test_count, display_test_count))
-else:
-    raise Exception("Run as follows: ipython notebook_test.py <notebook_path> <ref_dir> <test_dir>")
 
 
 if __name__ == '__main__':
