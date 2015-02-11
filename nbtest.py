@@ -103,6 +103,11 @@ try:
 except:
     from holoviews.ipython import IPTestCase
 
+try:
+    import coverage
+except:
+    coverage = None
+
 from nose.plugins.skip import SkipTest
 
 
@@ -223,11 +228,12 @@ class NBRunner(object):
     Run the code cells of a notebook and save their return values
     (possibly including display representation) to disk.
     """
-    def __init__(self, shell, name, nb, output_dir, reference=False):
+    def __init__(self, shell, name, nb, output_dir, project, reference=False):
         self.nb = nb
         self.shell = shell
         self.output_dir = output_dir
         self.reference = reference
+        self.project = project
 
         self.code_cells = self.get_code_cells(nb)
         self.capture = Capture(shell, name, reference, len(self.code_cells))
@@ -281,6 +287,18 @@ class NBRunner(object):
         buff = StringIO()
         seekpos = 0
         filelist = []
+
+        cov = None
+        if coverage is not None:
+            cov = coverage.coverage(auto_data=False,
+                                    branch=False,
+                                    source=[self.project],
+                                    data_suffix=None)
+
+            cov.exclude('#pragma[: ]+[nN][oO] [cC][oO][vV][eE][rR]')
+            cov.load()
+            cov.start()
+
         for i, cell in enumerate(self.code_cells):
             self.capture.object_data = None
             self.capture.display_data = None
@@ -330,8 +348,10 @@ class NBRunner(object):
         while self.capture.wait:
              time.sleep(1)
 
-
-        # shutil.rmtree(self.output_dir)
+        if cov:
+            cov.stop()
+            cov.combine()
+            cov.save()
 
 
 class Configure(object):
@@ -340,11 +360,12 @@ class Configure(object):
     files (reference and/or test data) and finally build unit tests
     (that nose can find) on NBTester.
     """
-    def __init__(self, notebook, ref_dir, data_dir, regen=False):
+    def __init__(self, notebook, ref_dir, data_dir, project, regen=False):
 
         self.notebook = notebook
         self.ref_dir = ref_dir
         self.data_dir = data_dir
+        self.project = project
         self.regen = regen
 
         self.ip = get_ipython()   # Get IPython instance (if possible)
@@ -450,7 +471,7 @@ class Configure(object):
         if regen:
             if os.path.isdir(ref_dir): shutil.rmtree(ref_dir)
             os.mkdir(ref_dir)
-            reference_runner =  NBRunner(ip, basename, nb, ref_dir, reference=True)
+            reference_runner =  NBRunner(ip, basename, nb, ref_dir, self.project, reference=True)
             reference_runner.run()
             return ''
         elif not os.path.isdir(ref_dir):
@@ -462,7 +483,7 @@ class Configure(object):
 
         # Generate the test data
         os.mkdir(data_dir)
-        NBRunner(ip, basename, nb, data_dir, reference=False).run()
+        NBRunner(ip, basename, nb, data_dir, self.project, reference=False).run()
         return msg
 
 
@@ -525,7 +546,7 @@ create_tests = False
 if os.path.isfile(NB_FILE) and args.ref_dir and args.data_dir:
     REF_DIR = os.path.abspath(args.ref_dir)
     DATA_DIR = os.path.abspath(args.data_dir)
-    configuration = Configure(NB_FILE, REF_DIR, DATA_DIR, regen)
+    configuration = Configure(NB_FILE, REF_DIR, DATA_DIR, args.project, regen)
     create_tests = configuration.generate_data()
 
 
