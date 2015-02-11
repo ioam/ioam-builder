@@ -105,7 +105,7 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
     test_dir = os.path.join(test_dir, project + '_' + notebook_name[:-6] + py_version)
     if regen and os.path.isdir(ref_dir):  shutil.rmtree(ref_dir)
 
-    cmds = ['ipython', test_script, notebook, ref_dir, test_dir, str(regen)]
+    cmds = ['ipython', test_script, project, notebook, ref_dir, test_dir, str(regen)]
     proc = subprocess.Popen(cmds,
                             stderr=subprocess.PIPE,
                             cwd=os.path.split(notebook)[0])

@@ -511,6 +511,7 @@ class Configure(object):
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument('project', type=str)
 parser.add_argument('notebook', type=str)
 parser.add_argument('ref_dir',  type=str)
 parser.add_argument('data_dir', type=str)
@@ -562,8 +563,8 @@ if __name__ == '__main__':
     """
     Test a single notebook as follows:
 
-    $ ipython nbtest.py [-h] notebook ref_dir data_dir regen
+    $ ipython nbtest.py [-h] project notebook ref_dir data_dir regen
     """
     import nose
-    sys.argv = sys.argv[:1] # Stop nose consuming notebook path
-    nose.runmodule()
+    project = sys.argv[1]
+    nose.runmodule(argv=[__file__, '--with-coverage', '--cover-package=%s' % project])
