@@ -119,7 +119,10 @@ PICKLE_PROTOCOL = 2
 DISPLAY_LINES_IGNORE = [
     'creating *_intermediate/compiler_*',
     '* restored from bytecode into *',
-    'Executing user startup file *'
+    'Executing user startup file *',
+    'Timer start: */*/* *:*:*',
+    'Timer elapsed: *:*:*',
+    '*100% * *:*:*'
     ]
 
 
@@ -558,7 +561,7 @@ class NBTester(IPTestCase):
 
     def __init__(self, *args, **kwargs):
         super(NBTester, self).__init__(*args, **kwargs)
-        registry = Comparison.register()
+        registry = IPTestCase.register()
         for k, v in registry.items():
             self.addTypeEqualityFunc(k, v)
 
