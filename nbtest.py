@@ -95,12 +95,13 @@ try:    import external  # pyflakes:ignore (Needed for imports)
 except: pass
 
 from holoviews import ipython
+from holoviews.element.comparison import Comparison
 from holoviews.ipython import magics
 
 try:
     from topo.analysis import TopoIPTestCase as IPTestCase
 except:
-    from holoviews.testing import IPTestCase
+    from holoviews.ipython import IPTestCase
 
 from nose.plugins.skip import SkipTest
 
@@ -149,6 +150,7 @@ class Capture(object):
         prompt = '_%d' % (self.counter['code'] + 2)
         obj = self.shell.user_ns.get(prompt, None)
         # Necessary in case the extension is reloaded
+        ipython.display_hooks.display_widgets = ipython.display_hooks.middle_frame
         ipython.display_hooks.render_anim = ipython.display_hooks.middle_frame
         self.shell.display_formatter.format(obj)[0]['text/plain']
         # Only set if bool and no captured via displayhook
@@ -531,6 +533,13 @@ class NBTester(IPTestCase):
     Tester class used by nosetests. Test methods dynamically generated
     from notebook data.
     """
+
+    def __init__(self, *args, **kwargs):
+        super(NBTester, self).__init__(*args, **kwargs)
+        registry = Comparison.register()
+        for k, v in registry.items():
+            self.addTypeEqualityFunc(k, v)
+
     @classmethod
     def tearDownClass(cls):
         if CLEANUP_DATA:
