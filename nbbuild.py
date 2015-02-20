@@ -151,7 +151,7 @@ def nb_to_html(nb_path):
     """convert notebook to html"""
     exporter = html.HTMLExporter(template_file='basic')
     output, resources = exporter.from_filename(nb_path)
-    return '\n'.join(lines)
+    return output
 
 def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False):
     # Create evaluated version and save it to the dest path.
