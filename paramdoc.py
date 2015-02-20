@@ -1,9 +1,13 @@
 import sys, os
+import inspect
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "param")))
 
 import param
-import inspect
+
+param.parameterized.docstring_signature = False
+param.parameterized.docstring_describe_params = False
+
 
 def param_formatter(app, what, name, obj, options, lines):
     if what == 'module':
