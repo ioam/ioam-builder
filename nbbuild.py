@@ -162,7 +162,8 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False):
     cwd = os.getcwd()
     filedir, filename = os.path.split(nb_path)
     os.chdir(filedir)
-    nb_runner = NotebookRunner(notebook, pylab=False, profile_dir='./nbpublisher/profile_docs')
+    profile_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile_docs')
+    nb_runner = NotebookRunner(notebook, pylab=False, profile_dir=profile_dir)
     try:
         nb_runner.run_notebook(skip_exceptions=skip_exceptions)
     except NotebookError as e:
