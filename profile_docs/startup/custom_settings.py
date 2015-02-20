@@ -1,7 +1,6 @@
 # Example of how to change the default imagen video format via profile
 
 import holoviews
-import imagen
 import numpy
 
 ip = get_ipython()
