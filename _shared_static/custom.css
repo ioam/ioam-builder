@@ -96,3 +96,13 @@ dl.class.rm_expanded dd {
 dl.class.rm_collapsed dd {
 	display: none;
 }
+
+div.input_prompt {
+    visibility: hidden;
+    height: 0;
+}
+
+div.output_prompt {
+    visibility: hidden;
+    height: 0;
+}
