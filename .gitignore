@@ -9,3 +9,7 @@
 *.o
 *.out
 *.lock
+
+*.sqlite
+profile_docs/startup/README
+profile_docs/static/
