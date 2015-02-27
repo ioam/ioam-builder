@@ -95,7 +95,6 @@ try:    import external  # pyflakes:ignore (Needed for imports)
 except: pass
 
 from holoviews import ipython
-from holoviews.element.comparison import Comparison
 from holoviews.ipython import magics
 
 try:

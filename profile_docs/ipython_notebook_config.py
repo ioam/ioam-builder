@@ -1,6 +1,6 @@
 # Stripped down configuration file for ipython-notebook in Topographica.
 
-c = get_config()
+c = get_config()  # pyflakes:ignore (IPython namespace)
 
 #------------------------------------------------------------------------------
 # NotebookApp configuration
