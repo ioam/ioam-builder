@@ -15,15 +15,6 @@ HTML_GLOB = os.path.abspath(os.path.join(__file__, '..', '..', '_build', 'html',
 STATIC_DIR = os.path.abspath(os.path.join(__file__, '..', '..', 'reference_data', 'media'))
 
 
-def fix_notebook_links(project, files):
-    for f in files:
-        with open(f, 'r') as html_file:
-            html = html_file.read()
-        fixed_html = re.sub(r"<a\ href=\"([\w ]+).ipynb\">", r'<a href="http://ioam.github.com/media/%s/\1.html">' % project, html)
-        with open(f, 'w') as html_file:
-            html_file.write(fixed_html)
-
-
 def switch_branch(repo, branch):
     proc = subprocess.Popen(["git", "checkout", branch], cwd=repo)
     proc.communicate()
@@ -50,15 +41,14 @@ if __name__ == "__main__":
     project = sys.argv[1]
     prompt = True if len(sys.argv) == 2 else False
     data_branch = project + "-data"
-    html_files = [f for f in glob.glob(HTML_GLOB) if os.path.basename(f) != 'index.html']
-    fix_notebook_links(project, html_files)
+    html_files = [f for f in glob.glob(HTML_GLOB)]
 
     if prompt:
         msg = input('Are you ready to push static notebooks? [y, N]: ')
         if msg.strip().lower() != 'y':
             sys.exit(0)
 
-    switch_branch(IOAM_REPO, "master")
+    switch_branch(IOAM_REPO, project.lower()+"-tutorials")
     dest_dir = os.path.join(STATIC_DIR, project)
     if not os.path.isdir(dest_dir):
         os.mkdir(dest_dir)
