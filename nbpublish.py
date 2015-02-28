@@ -12,7 +12,6 @@ except NameError: pass
 
 IOAM_REPO = os.path.abspath(os.path.join(__file__, '..', '..', 'reference_data'))
 HTML_GLOB = os.path.abspath(os.path.join(__file__, '..', '..', '_build', 'html', 'Tutorials', '*.html'))
-STATIC_DIR = os.path.abspath(os.path.join(__file__, '..', '..', 'reference_data', 'media'))
 
 
 def switch_branch(repo, branch):
@@ -49,11 +48,7 @@ if __name__ == "__main__":
             sys.exit(0)
 
     switch_branch(IOAM_REPO, project.lower()+"-tutorials")
-    dest_dir = os.path.join(STATIC_DIR, project)
-    if not os.path.isdir(dest_dir):
-        os.mkdir(dest_dir)
-
-    dest_files = [os.path.join(dest_dir, os.path.basename(f)) for f in html_files]
+    dest_files = [os.path.join(IOAM_REPO, os.path.basename(f)) for f in html_files]
 
     for f, dest_f in zip(html_files, dest_files):
         os.rename(f, dest_f)
