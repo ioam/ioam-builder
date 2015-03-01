@@ -15,9 +15,10 @@ for (project, _), files in file_list:
             continue
         basename = os.path.basename(f)
         rst_path = f[:-len('ipynb')].replace(' ', '_') + 'rst'
+        title = basename[:-6].replace('_', ' ')
         with open(rst_path, 'w') as rst_file:
-            rst_file.write(basename[:-5].replace('_', ' ')+'\n')
-            rst_file.write('_'*len(basename[:-5])+'\n')
+            rst_file.write(title+'\n')
+            rst_file.write('_'*len(title)+'\n')
             rst_file.write(".. notebook:: %s %s" % (project, basename))
 
 
