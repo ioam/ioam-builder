@@ -99,6 +99,7 @@ def create_package_file(root, master_package, subroot, py_files, opts, subs):
     """Build the text of the file and write the file."""
     package = os.path.split(root)[-1]
     text = format_heading(1, '%s.%s Package' % (master_package, package))
+    text += '\n---------\n\n'
     # add each package's module
     for py_file in py_files:
         if shall_skip(os.path.join(root, py_file)):
@@ -114,7 +115,7 @@ def create_package_file(root, master_package, subroot, py_files, opts, subs):
         text += format_inheritance_diagram(is_package and subroot or py_path, master_package)
         text += '\n\n'
         text += format_directive(is_package and subroot or py_path, master_package)
-        text += '\n'
+        text += '\n-------\n\n'
 
     # build a list of directories that are packages (they contain an INIT file)
     subs = [sub for sub in subs if os.path.isfile(os.path.join(root, sub, INIT))]
