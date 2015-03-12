@@ -5,7 +5,7 @@ on ioam.github.com:master.
 This script also fixes html links between notebooks.
 """
 
-import subprocess, os, sys, glob, re
+import subprocess, os, sys, glob
 
 try: input = raw_input
 except NameError: pass
