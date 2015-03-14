@@ -86,7 +86,7 @@ pyplot.switch_backend('agg')
 
 import IPython
 from IPython import get_ipython
-from IPython.display import clear_output
+from IPython.display import clear_output, SVG
 from IPython.nbformat import current
 
 # Dataviews is required. This is only a temporary fix.
@@ -121,9 +121,12 @@ DISPLAY_LINES_IGNORE = [
     'Executing user startup file *',
     'Timer start: */*/* *:*:*',
     'Timer elapsed: *:*:*',
-    '*100% * *:*:*'
+    '*100% * *:*:*',
+    '*Automatic capture is now enabled.*',
+    "*'mime_type': *"
     ]
 
+TYPE_IGNORE = [SVG]
 
 class Capture(object):
     """
@@ -193,6 +196,7 @@ class Capture(object):
         """
         def capture_hook(obj, pprinter, cycles):
             self.object_data = obj
+            display_data = display_hook(obj)
             self.display_data = display_hook(obj)
             info = (self.counter['code'], self.code_cell_count,
                     ' reference ' if self.reference else ' ', self.name)
@@ -200,6 +204,12 @@ class Capture(object):
             clear_output()
         return capture_hook
 
+    @staticmethod
+    def identity_hook(obj, pprinter, cycles):
+        """
+        Capture hook used to exclude types from comparisons.
+        """
+        pass
 
     def set_display_hooks(self):
         """
@@ -219,6 +229,8 @@ class Capture(object):
         # Set the combined set of patched hooks on text/plain (html notebook only)
         for tp, hook in html_printers.items():
             plain_formatter.for_type(tp, hook)
+        for tp in TYPE_IGNORE:
+            plain_formatter.for_type(tp, self.identity_hook)
 
         # Attempt to capture anything that is of type object...
         plain_formatter.for_type(object, self.empty_hook(object))
