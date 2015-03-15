@@ -123,7 +123,8 @@ DISPLAY_LINES_IGNORE = [
     'Timer elapsed: *:*:*',
     '*100% * *:*:*',
     '*Automatic capture is now enabled.*',
-    "*'mime_type': *"
+    "*'mime_type': *",
+    "Export name:*" 
     ]
 
 TYPE_IGNORE = [SVG]
