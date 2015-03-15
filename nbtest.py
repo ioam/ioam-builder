@@ -124,7 +124,8 @@ DISPLAY_LINES_IGNORE = [
     '*100% * *:*:*',
     '*Automatic capture is now enabled.*',
     "*'mime_type': *",
-    "Export name:*" 
+    "Export name:*",
+    "Directory *",
     ]
 
 TYPE_IGNORE = [SVG]
