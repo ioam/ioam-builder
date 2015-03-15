@@ -4,6 +4,13 @@ import shutil
 import subprocess
 import json, glob
 
+try:
+    import cyorderedict
+    raise Exception("Please generate tests in an environment"
+                    "without cyorderedict.")
+except:
+    pass
+
 
 class NotebookFinder(object):
     """
