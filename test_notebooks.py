@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import os, sys
-import zipfile
 import shutil
 import subprocess
 import json, glob
@@ -143,16 +142,6 @@ if __name__ == '__main__':
         raise Exception("No reference directory: %s" % ref_dir)
     if not os.path.isdir(test_dir):
         raise Exception("No test directory: %s" % test_dir)
-
-    for zipf in glob.glob(os.path.join(ref_dir, '*.zip')):
-        with zipfile.ZipFile(zipf) as zf:
-            for member in zf.infolist():
-                words = member.filename.split('/')
-                for word in words[:-1]:
-                    drive, word = os.path.splitdrive(word)
-                    head, word = os.path.split(word)
-                    if word in (os.curdir, os.pardir, ''): continue
-                    zf.extract(member, ref_dir)
 
     retcode = 0
     for (project, suite), paths in sorted(file_list):
