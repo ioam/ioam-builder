@@ -20,5 +20,8 @@ for (project, _), files in file_list:
             rst_file.write(title+'\n')
             rst_file.write('_'*len(title)+'\n')
             rst_file.write(".. notebook:: %s %s" % (project, basename))
+            rst_file.write('\n\n-------\n\n')
+            rst_file.write('`Download this notebook from GitHub.'
+                           '<https://raw.githubusercontent.com/ioam/holoviews/master/doc/Tutorials/%s>`_' % basename)
 
 
