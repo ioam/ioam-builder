@@ -388,7 +388,7 @@ class Configure(object):
         if self.ip is None: raise SkipTest("No IPython")
         # Booleans cannot be silenced (or captured normally)!
         prompt = "[Unsilenceable Boolean (ignore)]"
-        ipython.load_ipython_extension(self.ip, verbose=False)
+        ipython.load_ipython_extension(self.ip)
         self.ip.run_cell("%config PromptManager.out_template = '"+ prompt+"'", silent=True)
 
 
