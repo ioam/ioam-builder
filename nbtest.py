@@ -86,7 +86,7 @@ pyplot.switch_backend('agg')
 
 import IPython
 from IPython import get_ipython
-from IPython.display import clear_output, SVG
+from IPython.display import clear_output, SVG, HTML
 from IPython.nbformat import current
 
 # Dataviews is required. This is only a temporary fix.
@@ -128,7 +128,7 @@ DISPLAY_LINES_IGNORE = [
     "Directory *",
     ]
 
-TYPE_IGNORE = [SVG]
+TYPE_IGNORE = [SVG, HTML]
 
 class Capture(object):
     """
