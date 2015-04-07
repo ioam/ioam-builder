@@ -198,7 +198,6 @@ class Capture(object):
         """
         def capture_hook(obj, pprinter, cycles):
             self.object_data = obj
-            display_data = display_hook(obj)
             self.display_data = display_hook(obj)
             info = (self.counter['code'], self.code_cell_count,
                     ' reference ' if self.reference else ' ', self.name)

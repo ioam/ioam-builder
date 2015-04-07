@@ -5,7 +5,7 @@ import subprocess
 import json, glob
 
 try:
-    import cyorderedict
+    import cyorderedict  # pyflakes:ignore (Test import)
     raise Exception("Please generate tests in an environment"
                     "without cyorderedict.")
 except:
