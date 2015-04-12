@@ -439,7 +439,8 @@ class Configure(object):
             elif data_path.endswith('.html'):
                 test_data = open(data_path,'r').read()
                 ref_data =  open(ref_path,'r').read()
-                kwargs = {'msg':'Display output mismatch.'}
+                kwargs = {'msg':"Display output mismatch: '%s...' != '%s...'"
+                          % (test_data[:50], ref_data[:50])}
             try:
                 # Compare the contents of the two files
                 self.assertEqual(test_data, ref_data, **kwargs)
