@@ -7,4 +7,4 @@ ip = get_ipython()  # pyflakes:ignore (IPython namespace)
 ip.extension_manager.load_extension('holoviews.ipython')
 ip.run_line_magic('output', " holomap='widgets'")
 
-holoviews.plotting.Plot.figure_alpha = 0
+holoviews.plotting.MPLPlot.fig_alpha = 0
