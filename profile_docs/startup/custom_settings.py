@@ -5,6 +5,5 @@ import numpy     # pyflakes:ignore (API import)
 
 ip = get_ipython()  # pyflakes:ignore (IPython namespace)
 ip.extension_manager.load_extension('holoviews.ipython')
-ip.run_line_magic('output', " holomap='widgets'")
 
 holoviews.plotting.MPLPlot.fig_alpha = 0
