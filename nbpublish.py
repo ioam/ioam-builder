@@ -39,7 +39,12 @@ def push(repo):
 if __name__ == "__main__":
     project = sys.argv[1]
     prompt = True if len(sys.argv) == 2 else False
-    data_branch = project + "-data"
+    if project.lower() == 'holoviews':
+        branch = 'tutorials'
+        data_branch = 'reference_data'
+    else:
+        branch = project.lower()+"-tutorials"
+        data_branch = project + "-data"
     html_files = [f for f in glob.glob(HTML_GLOB)]
 
     if prompt:
@@ -47,7 +52,7 @@ if __name__ == "__main__":
         if msg.strip().lower() != 'y':
             sys.exit(0)
 
-    switch_branch(IOAM_REPO, project.lower()+"-tutorials")
+    switch_branch(IOAM_REPO, branch)
     dest_files = [os.path.join(IOAM_REPO, os.path.basename(f)) for f in html_files]
 
     for f, dest_f in zip(html_files, dest_files):
