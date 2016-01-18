@@ -19,3 +19,6 @@ function hook_classes() {
 }
 
 $(document).ready(hook_classes);
+
+// Patch doctools.js alias, restoring underscore.js
+_ = $u;
