@@ -165,6 +165,9 @@ ipynb-rst:
 	python nbpublisher/nbpagebuild.py
 	@echo "Created RST for documented notebooks."
 
+fix-links:
+	python builder/fix_links.py doc/_build/html
+
 refmanual:
 	- mkdir -p Reference_Manual
 	python ./builder/generate_modules.py $(MODULE) -d ./Reference_Manual -n $(PROJECT) -e tests
