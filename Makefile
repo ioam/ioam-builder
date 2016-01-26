@@ -166,7 +166,7 @@ ipynb-rst:
 	@echo "Created RST for documented notebooks."
 
 fix-links:
-	python builder/fix_links.py doc/_build/html
+	python builder/fix_links.py _build/html
 
 refmanual:
 	- mkdir -p Reference_Manual
