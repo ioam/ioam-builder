@@ -110,24 +110,10 @@ div.output_prompt {
     height: 0;
 }
 
-.text_cell .prompt {
-    display: none;
-}
-
-div.cell {
-    padding: 0;
-}
-
-div.text_cell_render {
-    padding: 0;
-}
-
-div.prompt {
-    font-size: 13px;
-}
-
-div.input_area {
-    margin: .2em 0.4em;
+.output_subarea pre {
+	background-color: transparent;
+	border-style: none;
+	margin-left: 1em;
 }
 
 table.dataframe {
