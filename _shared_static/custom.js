@@ -16,7 +16,12 @@ function expand(e) {
 function hook_classes() {
 	$("dl.class dt").click(expand);
 	$("dl.class").addClass("rm_collapsed");
+	$.each($('code'), function(index, code) {
+		code.textContent = code.textContent.trim()
+	})
 }
+
+
 
 $(document).ready(hook_classes);
 
