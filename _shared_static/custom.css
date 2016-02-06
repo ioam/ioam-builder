@@ -120,9 +120,17 @@ table.dataframe {
     font-family: Arial, sans-serif;
     font-size: 13px;
     line-height: 20px;
+	margin-left: 2em;
+	margin-bottom: 2em;
 }
 
 table.dataframe th, td {
     padding: 4px;
     text-align: left;
+}
+
+.rendered_html td {
+    border: solid;
+    border-width: 1px;
+    word-wrap: break-word;
 }
