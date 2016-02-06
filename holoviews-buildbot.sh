@@ -147,7 +147,7 @@ docker run -p 9989:10000 --name=minislave --privileged -d \
 
    chmod +x /slave/run_buildbot_slave.sh
    chmod +x /slave/holoviews-buildbot.sh
-   holoviews-buildbot.sh small-slave
+   /slave/holoviews-buildbot.sh small-slave
 
 6. Install the following:
 
