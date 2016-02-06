@@ -18,10 +18,11 @@ function hook_classes() {
 	$("dl.class").addClass("rm_collapsed");
 	$.each($('code'), function(index, code) {
 		code.textContent = code.textContent.trim()
-	})
+	});
+	$.each($('.output_subarea').find('pre'), function(index, pre) {
+		pre.textContent = pre.textContent.split('&apos;').join("'");
+	});
 }
-
-
 
 $(document).ready(hook_classes);
 
