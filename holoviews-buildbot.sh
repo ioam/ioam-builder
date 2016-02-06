@@ -151,7 +151,7 @@ docker run -p 9989:10000 --name=minislave --privileged -d \
 
 6. Install the following:
 
-   pip install awscli boto3
+   pip install awscli boto3 flake8 pylint
    sudo apt-get update
    sudo apt-get install curl jq rubygems-integration ruby-dev unzip
    gem install travis
@@ -293,6 +293,16 @@ esac
 AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws s3 sync \$1 \$BUCKET
 EOM
     chmod +x /slave/sync_with_S3.sh
+}
+
+
+function pylint_rc {
+    # Run with pylint --disable=R,C --rcfile=/slave/pylintrc  .
+    cat > /slave/pylintrc <<- EOM
+[TYPECHECK]
+
+ignored-modules = numpy,param
+EOM
 }
 
 
@@ -440,7 +450,8 @@ case $1 in
      slave-buildbot)
          buildbot_cmds;;
      small-slave)
-         git_PR_init;;
+         git_PR_init;
+         pylint_rc;;
      upstart-script)
         docker_conf;;
      *)
