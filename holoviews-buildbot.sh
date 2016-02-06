@@ -220,7 +220,7 @@ LARGE SLAVE
 
 5. Install these dependencies:
   sudo apt-get update
-  sudo apt-get install curl libsm6 libxrender1 graphviz # Will fail otherwise
+  sudo apt-get install curl libsm6 libxrender1 graphviz libav-tools imagemagick # Will fail without libsm and xrender
 
 6. Run this script inside the /slave directory twice and exit:
 
