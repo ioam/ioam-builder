@@ -139,10 +139,10 @@ table.dataframe th, td {
 	font-size: 0.9em !important;
 }
 
-.bk-plot td {
-	border-style: none;
-}
-
 .bk-plot ul {
     margin-bottom: 2px !important;
+}
+
+.bk-plot-wrapper td{
+    border-style: none !important;
 }
