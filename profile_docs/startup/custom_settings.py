@@ -8,7 +8,7 @@ ip.extension_manager.load_extension('holoviews.ipython')
 
 from holoviews.plotting.widgets import NdWidget
 NdWidget.export_json=True
-NdWidget.json_load_path = ''
+NdWidget.json_load_path = '/json'
 NdWidget.json_save_path = './'
 
 holoviews.plotting.MPLPlot.fig_alpha = 0
