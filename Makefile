@@ -166,7 +166,8 @@ ipynb-rst:
 	@echo "Created RST for documented notebooks."
 
 fix-links:
-	python builder/fix_links.py _build/html
+	- python builder/fix_links.py _build/html
+	- find . -type f -name '*.json' -exec cp -p --parents {} ./_build/html/ ";"
 
 refmanual:
 	- mkdir -p Reference_Manual
