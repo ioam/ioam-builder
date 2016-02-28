@@ -5,8 +5,6 @@ function expand(e) {
 		var p = e.target.parentNode;
 	}
 
-	//if (p.className.indexOf
-
 	if (p.className == "class rm_collapsed")
 		p.className = "class rm_expanded";
 	else if (p.className == "class rm_expanded")
@@ -14,7 +12,8 @@ function expand(e) {
 }
 
 function expand_ref(ref) {
-	while (ref.tagName != 'DL' && ref.parentNode !== undefined) {
+	while (ref.className !== 'class rm_collapsed' &&
+		   ref.parentNode !== undefined) {
 		ref = ref.parentNode;
 	}
 	if (ref.className == 'class rm_collapsed') {
@@ -24,10 +23,12 @@ function expand_ref(ref) {
 
 function expand_loc() {
 	var loc = location.hash;
-	if (loc.indexOf('#') > -1) {
+	if (loc[0] === '#') {
 		var ref = $(loc.split('.').join('\\.'));
 		if (ref.length) {
 			expand_ref(ref[0]);
+			var top = ref[0].position().top;
+			$(window).scrollTop(top);
 		}
 	}
 }
