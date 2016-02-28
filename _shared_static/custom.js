@@ -13,15 +13,36 @@ function expand(e) {
 		p.className = "class rm_collapsed";
 }
 
+function expand_ref(ref) {
+	while (ref.tagName != 'DL' && ref.parentNode !== undefined) {
+		ref = ref.parentNode;
+	}
+	if (ref.className == 'class rm_collapsed') {
+		ref.className = "class rm_expanded";
+	}
+}
+
+function expand_loc() {
+	var loc = location.hash;
+	if (loc.indexOf('#') > -1) {
+		var ref = $(loc.split('.').join('\\.'));
+		if (ref.length) {
+			expand_ref(ref[0]);
+		}
+	}
+}
+
 function hook_classes() {
+	window.onhashchange = expand_loc;
 	$("dl.class dt").click(expand);
-	$("dl.class").addClass("rm_collapsed");
+	$('body').find('dl.class').addClass("rm_collapsed");
 	$.each($('code'), function(index, code) {
 		code.textContent = code.textContent.trim()
 	});
 	$.each($('.output_subarea').find('pre'), function(index, pre) {
 		pre.textContent = pre.textContent.split('&apos;').join("'");
 	});
+	expand_loc();
 }
 
 $(document).ready(hook_classes);
