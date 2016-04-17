@@ -2,6 +2,9 @@
 
 import holoviews # pyflakes:ignore (API import)
 import numpy     # pyflakes:ignore (API import)
+import warnings
+
+warnings.filterwarnings("ignore")
 
 ip = get_ipython()  # pyflakes:ignore (IPython namespace)
 ip.extension_manager.load_extension('holoviews.ipython')
