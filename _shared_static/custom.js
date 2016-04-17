@@ -46,6 +46,8 @@ function hook_classes() {
 	expand_loc();
 }
 
+
+delete require;
 $(document).ready(hook_classes);
 
 // Patch doctools.js alias, restoring underscore.js
