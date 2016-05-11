@@ -1,7 +1,7 @@
 # Example of how to change the default imagen video format via profile
 
-import holoviews # pyflakes:ignore (API import)
-import numpy     # pyflakes:ignore (API import)
+import holoviews # noqa (API import)
+import numpy     # noqa (API import)
 import warnings
 
 warnings.filterwarnings("ignore")
