@@ -53,7 +53,8 @@ Limitations
 * There needs to be cleaner way to achieve all this!
 """
 
-import sys, os, pickle,  shutil, time, fnmatch
+import sys, os, pickle, shutil, time, fnmatch, json, operator
+import itertools
 try:
     from StringIO import StringIO
 except:
@@ -129,6 +130,55 @@ DISPLAY_LINES_IGNORE = [
     ]
 
 TYPE_IGNORE = [SVG, HTML]
+
+
+def get_all_json(teststr):
+    """
+    Generator that yields all valid JSON constructs
+    in a string.
+    """
+    decoder = json.JSONDecoder()
+    sliceat = teststr.find('{')
+    while sliceat != -1:
+        teststr = teststr[sliceat:]
+        try:
+            obj, consumed = decoder.raw_decode(teststr)
+        except Exception:
+            sliceat = teststr.find('{', 1)
+        else:
+            yield obj
+            sliceat = consumed
+
+
+def get_types(obj):
+    ids = []
+    if isinstance(obj, list):
+        ids = [get_types(o) for o in obj]
+    elif isinstance(obj, dict):
+        ids = [(v,) if k == 'type' else get_types(v)
+               for k, v in obj.items()]
+    return tuple(itertools.chain(*ids))
+
+
+def cleanup_json(obj, delete=[]):
+    """
+    Cleans up json emitted by bokeh plots to ensure
+    deterministic ordering and deleting non-deterministic
+    output such as object ids.
+    """
+    if isinstance(obj, list):
+        obj = [(get_types(o), cleanup_json(o, delete)) for o in obj]
+        obj = [o for _, o in sorted(obj)]
+    elif isinstance(obj, dict):
+        obj = {k: cleanup_json(v, delete)
+               for k, v in obj.items()
+               if k not in delete}
+    return obj
+
+
+BOKEH_IGNORE = ['id', 'notebook_comms_target', 'docid',
+                'elementid', 'modelid', 'root_ids']
+
 
 class Capture(object):
     """
@@ -439,8 +489,18 @@ class Configure(object):
             elif data_path.endswith('.html'):
                 test_data = open(data_path,'r').read()
                 ref_data =  open(ref_path,'r').read()
-                kwargs = {'msg':"Display output mismatch: '%s...' != '%s...'"
-                          % (test_data[:50], ref_data[:50])}
+                ref_data = cleanup_json(list(get_all_json(ref_data)), BOKEH_IGNORE)
+                ref_data = [d.values()[0] for d in ref_data if d]
+                test_data = cleanup_json(list(get_all_json(test_data)), BOKEH_IGNORE)
+                test_data = [d.values()[0] for d in test_data if d]
+                try:
+                    import deepdiff
+                    msg = ("Display output mismatch: %s"
+                           % [deepdiff.DeepDiff(test_data[i], ref_data[i])
+                              for i in range(len(ref_data))])
+                except:
+                    msg = 'deepdiff required to display JSON diff'
+                kwargs = {'msg': msg}
             try:
                 # Compare the contents of the two files
                 self.assertEqual(test_data, ref_data, **kwargs)
