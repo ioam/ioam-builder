@@ -154,22 +154,36 @@ docker run -p 9989:10000 --name=minislave --privileged -d \
    pip install awscli boto3 flake8 pylint
    sudo apt-get update
    sudo apt-get install curl jq rubygems-integration ruby-dev unzip
-   gem install travis
 
-7. Get the hub tool:
+7. Install ruby2 from source (now needed by the travis command):
+
+   sudo apt-get -y update
+   sudo apt-get -y install build-essential zlib1g-dev libssl-dev \
+                           libreadline6-dev libyaml-dev
+   cd /tmp
+   wget http://cache.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p481.tar.gz
+   tar -xvzf ruby-2.0.0-p481.tar.gz
+   cd ruby-2.0.0-p481/
+   ./configure --prefix=/usr/local
+   make
+   sudo make install
+   /usr/local/bin/ruby /usr/local/bin/gem install travis
+
+8. Get the hub tool:
 
    cd /slave
    wget https://github.com/github/hub/releases/download/v2.2.3/hub-linux-amd64-2.2.3.tgz
    tar zxvf hub-linux-amd64-2.2.3.tgz; mv hub-linux-amd64-2.2.3 hub
 
-8. Configure git and travis credentials:
+9. Configure git and travis credentials. Make sure sf-issues is
+   authorized to access travis:
 
    su buildbot
    git config --global user.email 'holoviews@gmail.com'
    git config --global user.name 'Buildbot'
    travis login --org
 
-9. Remaining as the buildbot user, create an ssh key (no passphrase) and
+10. Remaining as the buildbot user, create an ssh key (no passphrase) and
    add to ssh-agent (visit
    https://help.github.com/articles/generating-a-new-ssh-key/ for more
    info)
@@ -178,7 +192,7 @@ docker run -p 9989:10000 --name=minislave --privileged -d \
    eval "$(ssh-agent -s)"
    ssh-add ~/.ssh/id_rsa
 
-10. Add public key to sf-issues user on github and add to hosts:
+11. Add public key to sf-issues user on github and add to hosts:
 
    cat ~/.ssh/id_rsa.pub
    git clone git@github.com:ioam/holoviews-data.git # Just to add to hosts
