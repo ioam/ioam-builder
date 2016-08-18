@@ -23,9 +23,21 @@ SIZE="2"  # Size in GB of the node.
 function start_slave {
 
     echo "Starting slave..."
-    images=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=3") 
-    snapshot_id=$(echo $images | jq '.images[] | select(.name == "buildbot-slave") | .id')
+    # My bash skills aren't very good...
+    images1=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=1")
+    snapshot_id1=$(echo $images1 | jq '.images[] | select(.name == "buildbot-slave") | .id')
+    images2=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=2")
+    snapshot_id2=$(echo $images2 | jq '.images[] | select(.name == "buildbot-slave") | .id')
+    images3=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=3")
+    snapshot_id3=$(echo $images3 | jq '.images[] | select(.name == "buildbot-slave") | .id')
+    images4=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=4")
+    snapshot_id4=$(echo $images4 | jq '.images[] | select(.name == "buildbot-slave") | .id')
+    images5=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=5")
+    snapshot_id5=$(echo $images5 | jq '.images[] | select(.name == "buildbot-slave") | .id')
+    images6=$(curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/images?page=6")
+    snapshot_id6=$(echo $images6 | jq '.images[] | select(.name == "buildbot-slave") | .id')
 
+    snapshot_id=$(echo $snapshot_id1$snapshot_id2$snapshot_id3$snapshot_id4$snapshot_id5$snapshot_id6)
 
     # Should check that there is no droplet already called buildbot-slave...
     started=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"name":"buildbot-slave","region":"lon1","size":"'$SIZE'gb","image":'$snapshot_id',"ssh_keys":["e6:28:e6:95:c3:1a:3a:5e:b5:f0:e6:f9:e9:98:90:f7"],"backups":false,"ipv6":true,"user_data":null,"private_networking":null}' "https://api.digitalocean.com/v2/droplets" % 'MacBook')
