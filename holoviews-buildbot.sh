@@ -119,6 +119,10 @@ You can check the listener script is running by jumping into the
 container and running ``ps aux``. If you want to update the listener
 kill any existing listeners as only one should be running at a time.
 
+If re-imaging (e.g to update bokeh), remember to rm /slave/twistd.pid
+before shutting down and creating the image. Only one image called
+buildbot-slave should be used.
+
 
 SMALL SLAVE
 ===========
@@ -206,6 +210,8 @@ docker run -p 9989:10000 --name=minislave --privileged -d \
 
 LARGE SLAVE
 ===========
+
+Note that due to the SSH key setup, the login is via ssh root@$DROPLET_IP.
 
 1. Set the MASTER IP:
 
