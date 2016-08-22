@@ -174,8 +174,8 @@ if sys.argv[1] == 'restart-wait':
     else:
         build_number = int(sys.argv[2])
 
-    restart_build(build_number-1) # push build
-    restart_wait(build_number)    # pr build
+    restart_build(build_number)
+    # restart_wait(build_number)    # Travis API changed. No longer works.
 
 elif sys.argv[1] =='last-build':
     assert int(sys.argv[2]) >= 0
@@ -196,9 +196,9 @@ elif sys.argv[1]=='fetch-PR':
     print "The last Travis build number for PR #%s is %d" % (PR_number, build_number)
     print "\nFetching data for build number %d from S3\n" % build_number
     copy_from_S3(int(build_number), destdir)
-    print "Writing build number to BUILD_NUMBER_FILE"
+    print "Writing the PR number to BUILD_NUMBER_FILE"
     with open('/slave/update-PR/BUILD_NUMBER_FILE', 'w') as f:
-        f.write(str(build_number))
+        f.write(str(PR_number))
 else:
     print "First argument must be either 'restart-wait', 'restart-master-merge', 'last-PR-build' or 'fetch-PR'"
 
