@@ -377,7 +377,7 @@ function slave_root_cmds {
 function buildbot_cmds {
     sync_script
     # Configure the conda environment for buildbot user (slave)
-    INSTALL="buildbot-env python nose numpy=1.9.1 matplotlib bokeh pandas scipy jupyter ipython param runipy sphinx matplotlib seaborn requests beautiful-soup freetype=2.5.2"
+    INSTALL="buildbot-env python nose numpy=1.9.1 matplotlib bokeh pandas scipy jupyter ipython param runipy sphinx matplotlib seaborn requests beautiful-soup freetype=2.5.2 xarray"
 
     # Download and install miniconda
     python -c 'import wget; wget.download("https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh", out="miniconda.sh")'
