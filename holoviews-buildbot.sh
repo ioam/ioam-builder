@@ -107,6 +107,9 @@ MASTER
   ./holoviews-buildbot.sh master
   pip install bottle; exit
 
+  NOTE: For documentation, install iris into the conda environment from
+        conda-forge.
+
 5. Stop and start master:
 
   docker stop master; docker start master
