@@ -65,7 +65,8 @@ function start_wait_slave {
         sleep 2
         count=$((count + 1))
         ping -q -c 1 $(echo "$droplet_IP" | tr -d '"')  && echo 'Slave responded to ping. Wait a minute for the slave to connect to buildbot.' && exit
-        echo "No response after $count tries (can take up to 50 tries)"
+        echo "No response after $count tries (can take up to 50 tries, max=200)"
+        if (( $count > 200 )) ; then exit; fi
     done
     }
 
