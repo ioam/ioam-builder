@@ -489,17 +489,25 @@ class Configure(object):
             elif data_path.endswith('.html'):
                 test_data = open(data_path,'r').read()
                 ref_data =  open(ref_path,'r').read()
-                ref_data = cleanup_json(list(get_all_json(ref_data)), BOKEH_IGNORE)
-                ref_data = [d.values()[0] for d in ref_data if d]
-                test_data = cleanup_json(list(get_all_json(test_data)), BOKEH_IGNORE)
-                test_data = [d.values()[0] for d in test_data if d]
-                try:
-                    import deepdiff
-                    msg = ("Display output mismatch: %s"
-                           % [deepdiff.DeepDiff(test_data[i], ref_data[i])
-                              for i in range(len(ref_data))])
-                except:
-                    msg = 'deepdiff required to display JSON diff'
+                json_ref_data = list(get_all_json(ref_data))
+                if json_ref_data:
+                    ref_data = cleanup_json(json_ref_data, BOKEH_IGNORE)
+                    ref_data = [list(d.values())[0] for d in ref_data if d]
+                json_test_data = list(get_all_json(test_data))
+                if json_test_data:
+                    test_data = cleanup_json(json_test_data, BOKEH_IGNORE)
+                    test_data = [list(d.values())[0] for d in test_data if d]
+                if json_ref_data or json_test_data:
+                    try:
+                        import deepdiff
+                        msg = ("Display output mismatch: %s"
+                               % [deepdiff.DeepDiff(test_data[i], ref_data[i])
+                                  for i in range(len(ref_data))])
+                    except:
+                        msg = 'deepdiff required to display JSON diff'
+                else:
+                    msg = ("Display output mismatch: '%s...' != '%s...'"
+                           % (test_data[:50], ref_data[:50]))
                 kwargs = {'msg': msg}
             try:
                 # Compare the contents of the two files
