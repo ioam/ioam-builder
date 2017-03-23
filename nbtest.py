@@ -502,7 +502,7 @@ class Configure(object):
                         import deepdiff
                         msg = ("Display output mismatch: %s"
                                % [deepdiff.DeepDiff(test_data[i], ref_data[i])
-                                  for i in range(len(ref_data))])
+                                  for i in range(len(ref_data))])[:1000]
                     except:
                         msg = 'deepdiff required to display JSON diff'
                 else:
