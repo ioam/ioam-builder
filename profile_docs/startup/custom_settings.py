@@ -4,6 +4,11 @@ import holoviews # noqa (API import)
 import numpy     # noqa (API import)
 import warnings
 
+import matplotlib as mpl
+mpl.use('agg')
+
+import holoviews.plotting.mpl
+
 warnings.filterwarnings("ignore")
 
 ip = get_ipython()  # pyflakes:ignore (IPython namespace)
@@ -14,4 +19,4 @@ NdWidget.export_json=True
 NdWidget.json_load_path = '/json'
 NdWidget.json_save_path = './'
 
-holoviews.plotting.MPLPlot.fig_alpha = 0
+holoviews.plotting.mpl.MPLPlot.fig_alpha = 0
