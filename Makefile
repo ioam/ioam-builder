@@ -168,6 +168,10 @@ ipynb-rst:
 	python nbpublisher/nbpagebuild.py
 	@echo "Created RST for documented notebooks."
 
+gallery:
+	python builder/gallery.py
+	@echo "Generated thumbnails and index and rst files for the gallery"
+
 fix-links:
 	- python builder/fix_links.py _build/html
 	- mkdir ./_build/html/json
