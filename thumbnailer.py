@@ -39,7 +39,7 @@ def execute(code):
     proc = subprocess.Popen(['python'],
                             stdin=subprocess.PIPE)
     proc.communicate(code)
-
+    return proc.returncode
 
 def notebook_thumbnail(filename, subpath):
     basename = os.path.splitext(os.path.basename(filename))[0]
