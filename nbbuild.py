@@ -85,7 +85,6 @@ class NotebookSlice(Preprocessor):
     def preprocess(self, nb, resources):
         nbc = copy.deepcopy(nb)
         start,end = self._find_slice(nbc, self.substring, self.end)
-        print(start, end)
         nbc.cells = nbc.cells[start:end]
         return nbc, resources
 
@@ -173,6 +172,11 @@ class NotebookDirective(Directive):
         # Evaluate Notebook and insert into Sphinx doc
         skip_exceptions = 'skip_exceptions' in self.options
 
+        # Make temp_evaluated.ipynb include the notebook name
+        nb_name = os.path.split(nb_abs_path)[1].replace('.ipynb','')
+        dest_path_eval = dest_path_eval.replace('temp_evaluated.ipynb',
+                               '{nb_name}_temp_evaluated.ipynb'.format(nb_name=nb_name))
+
         # Parse slice
         evaluated_text = evaluate_notebook(nb_abs_path, dest_path_eval,
                                            skip_exceptions=skip_exceptions,
@@ -229,20 +233,26 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
     os.chdir(filedir)
     profile_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile_docs')
     nb_runner = NotebookRunner(notebook, pylab=False, profile_dir=profile_dir)
-    try:
-        nb_runner.run_notebook(skip_exceptions=skip_exceptions)
-    except NotebookError as e:
-        print('')
-        print(e)
-        # Return the traceback, filtering out ANSI color codes.
-        # http://stackoverflow.com/questions/13506033/filtering-out-ansi-escape-sequences
-        return 'Notebook conversion failed with the following traceback: \n%s' % \
-            re.sub(r'\\033[\[\]]([0-9]{1,2}([;@][0-9]{0,2})*)*[mKP]?', '', str(e))
-    os.chdir(cwd)
-    write(nb_runner.nb, open(dest_path, 'w'), 'json')
+
+    if not os.path.isfile(dest_path):
+        print('INFO: Running temp notebook {dest_path!s}'.format(
+            dest_path=os.path.abspath(dest_path)))
+        try:
+            nb_runner.run_notebook(skip_exceptions=skip_exceptions)
+        except NotebookError as e:
+            print('')
+            print(e)
+            # Return the traceback, filtering out ANSI color codes.
+            # http://stackoverflow.com/questions/13506033/filtering-out-ansi-escape-sequences
+            return 'Notebook conversion failed with the following traceback: \n%s' % \
+                re.sub(r'\\033[\[\]]([0-9]{1,2}([;@][0-9]{0,2})*)*[mKP]?', '', str(e))
+        os.chdir(cwd)
+        write(nb_runner.nb, open(dest_path, 'w'), 'json')
+    else:
+        print('INFO: Skipping existing temp notebook {dest_path!s}'.format(
+            dest_path=os.path.abspath(dest_path)))
+
     ret = nb_to_html(dest_path, preprocessors=[NotebookSlice(substring, end)])
-    # if dest_path.endswith('temp_evaluated.ipynb'):
-    #     os.remove(dest_path)
     return ret
 
 
@@ -287,10 +297,3 @@ if __name__ == '__main__':
         with open(nbpath[:-6] + '.html', 'w') as f:
             nb_html = evaluate_notebook(nbpath, dest_path=dest_path, skip_exceptions=skip)
             f.write(nb_html)
-
-# if __name__ == '__main__':
-#     import sys
-#     assert len(sys.argv) == 4
-#     [_, filename, substring, end] = sys.argv
-#     preprocessors = [NotebookSlice(substring=substring, end=end)]
-#     ret = nb_to_html(filename, preprocessors=preprocessors)
