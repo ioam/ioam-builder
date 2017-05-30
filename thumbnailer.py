@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, subprocess
 from nbconvert.preprocessors import Preprocessor
 
 from holoviews.ipython.preprocessors import OptsMagicProcessor, OutputMagicProcessor
@@ -26,7 +26,7 @@ class ThumbnailProcessor(Preprocessor):
 
     def preprocess_cell(self, cell, resources, index):
         if cell['cell_type'] == 'code':
-            template = 'thumbnail({{expr}}, {basename!r})'
+            template = 'from nbpublisher.thumbnailer import thumbnail;thumbnail({{expr}}, {basename!r})'
             cell['source'] = wrap_cell_expression(cell['source'],
                                                   template.format(
                                                       basename=self.basename))
@@ -36,11 +36,9 @@ class ThumbnailProcessor(Preprocessor):
 
 
 def execute(code):
-    namespace = {'thumbnail':thumbnail, 'matplotlib':matplotlib}
-    if sys.version_info.major==3:
-        exec(code, namespace)
-    else:
-        exec(code) in namespace
+    proc = subprocess.Popen(['python'],
+                            stdin=subprocess.PIPE)
+    proc.communicate(code)
 
 
 def notebook_thumbnail(filename, subpath):
