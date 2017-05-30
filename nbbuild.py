@@ -25,7 +25,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import os, string, glob, re
+import os, string, glob, re, copy, ast
 
 from sphinx.util.compat import Directive
 from docutils import nodes
@@ -36,6 +36,60 @@ from runipy.notebook_runner import NotebookRunner, NotebookError
 from test_notebooks import run_notebook_test
 
 
+try:
+    from nbconvert.preprocessors import Preprocessor
+except ImportError:
+    try:
+        from IPython.nbconvert.preprocessors import Preprocessor
+    except ImportError:
+        # IPython < 2.0
+        from IPython.nbconvert.transformers import Transformer as Preprocessor
+
+
+class NotebookSlice(Preprocessor):
+    """A transformer to select a slice of the cells of a notebook"""
+
+
+    def __init__(self, substring=None, end=None, **kwargs):
+        self.substring = substring
+        self.end = end
+        super(NotebookSlice, self).__init__(**kwargs)
+
+    def _find_slice(self, nbc, substring, endstr):
+        start, end = None, None
+        try:
+            end = int(endstr)
+            count = 0
+        except:
+            count = None
+
+        for ind, cell in enumerate(nbc.cells):
+            source = cell['source']
+            if start is None and substring in source:
+                start = ind
+            if None not in [start, count]:
+                if count >= end:
+                    end = ind
+                    break
+                count += 1
+            elif start is not None:
+                if endstr in source:
+                    end = ind + 1
+                    break
+
+        if None in [start, end]:
+            raise Exception('Invalid notebook slice')
+
+        return (start,end)
+
+    def preprocess(self, nb, resources):
+        nbc = copy.deepcopy(nb)
+        start,end = self._find_slice(nbc, self.substring, self.end)
+        nbc.cells = nbc.cells[start:end]
+        return nbc, resources
+
+    def __call__(self, nb, resources): return self.preprocess(nb,resources)
+
 
 class NotebookDirective(Directive):
     """Insert an evaluated notebook into a document
@@ -43,14 +97,20 @@ class NotebookDirective(Directive):
     This uses runipy and nbconvert to transform a path to an unevaluated notebook
     into html suitable for embedding in a Sphinx document.
     """
-    required_arguments = 1
-    optional_arguments = 1
-    option_spec = {'skip_exceptions' : directives.flag}
+    required_arguments = 2
+    optional_arguments = 3
+    option_spec = {'skip_exceptions' : directives.flag,
+                   'substring':str, 'end':str }
 
     def run(self):
         # check if raw html is supported
         if not self.state.document.settings.raw_enabled:
             raise self.warning('"%s" directive disabled.' % self.name)
+
+        if 'substring' not in self.options:
+            raise Exception('Please specify substring specification.')
+        if 'end' not in self.options:
+            raise Exception('Please specify end specification.')
 
         # Process paths and directories
         project = self.arguments[0].lower()
@@ -112,8 +172,16 @@ class NotebookDirective(Directive):
         # Evaluate Notebook and insert into Sphinx doc
         skip_exceptions = 'skip_exceptions' in self.options
 
+        # Make temp_evaluated.ipynb include the notebook name
+        nb_name = os.path.split(nb_abs_path)[1].replace('.ipynb','')
+        dest_path_eval = dest_path_eval.replace('temp_evaluated.ipynb',
+                               '{nb_name}_temp_evaluated.ipynb'.format(nb_name=nb_name))
+
+        # Parse slice
         evaluated_text = evaluate_notebook(nb_abs_path, dest_path_eval,
-                                           skip_exceptions=skip_exceptions)
+                                           skip_exceptions=skip_exceptions,
+                                           substring=self.options['substring'],
+                                           end = self.options['end'])
 
         # Insert evaluated notebook HTML into Sphinx
 
@@ -147,38 +215,44 @@ def nb_to_python(nb_path):
     return output
 
 
-def nb_to_html(nb_path):
+def nb_to_html(nb_path, preprocessors=[]):
     """convert notebook to html"""
-    exporter = html.HTMLExporter(template_file='basic')
+    exporter = html.HTMLExporter(template_file='basic',
+                                 preprocessors=preprocessors)
     output, resources = exporter.from_filename(nb_path)
     return output
 
-def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False):
+def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
+                      substring=None, end=None):
     # Create evaluated version and save it to the dest path.
     # Always use --pylab so figures appear inline
     # perhaps this is questionable?
-
     notebook = read(open(nb_path), 'json')
     cwd = os.getcwd()
     filedir, filename = os.path.split(nb_path)
     os.chdir(filedir)
     profile_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile_docs')
     nb_runner = NotebookRunner(notebook, pylab=False, profile_dir=profile_dir)
-    try:
-        nb_runner.run_notebook(skip_exceptions=skip_exceptions)
-    except NotebookError as e:
-        print('')
-        print(e)
-        # Return the traceback, filtering out ANSI color codes.
-        # http://stackoverflow.com/questions/13506033/filtering-out-ansi-escape-sequences
-        return 'Notebook conversion failed with the following traceback: \n%s' % \
-            re.sub(r'\\033[\[\]]([0-9]{1,2}([;@][0-9]{0,2})*)*[mKP]?', '', str(e))
-    os.chdir(cwd)
-    write(nb_runner.nb, open(dest_path, 'w'), 'json')
 
-    ret = nb_to_html(dest_path)
-    if dest_path.endswith('temp_evaluated.ipynb'):
-        os.remove(dest_path)
+    if not os.path.isfile(dest_path):
+        print('INFO: Running temp notebook {dest_path!s}'.format(
+            dest_path=os.path.abspath(dest_path)))
+        try:
+            nb_runner.run_notebook(skip_exceptions=skip_exceptions)
+        except NotebookError as e:
+            print('')
+            print(e)
+            # Return the traceback, filtering out ANSI color codes.
+            # http://stackoverflow.com/questions/13506033/filtering-out-ansi-escape-sequences
+            return 'Notebook conversion failed with the following traceback: \n%s' % \
+                re.sub(r'\\033[\[\]]([0-9]{1,2}([;@][0-9]{0,2})*)*[mKP]?', '', str(e))
+        os.chdir(cwd)
+        write(nb_runner.nb, open(dest_path, 'w'), 'json')
+    else:
+        print('INFO: Skipping existing temp notebook {dest_path!s}'.format(
+            dest_path=os.path.abspath(dest_path)))
+
+    ret = nb_to_html(dest_path, preprocessors=[NotebookSlice(substring, end)])
     return ret
 
 
