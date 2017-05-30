@@ -43,6 +43,7 @@ clean:
 	-rm -rf $(BUILDDIR)/doctrees
 
 html:
+	-rm -f  $(BUILDDIR)/html/*temp_evaluated.ipynb
 	mkdir -p ./_static
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
