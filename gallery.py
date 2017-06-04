@@ -13,7 +13,7 @@ except ImportError:
 
 # CONFIGURATION
 TITLE = 'Gallery'
-gallery_conf = {'Demos': 'demos'}
+gallery_conf = {'Elements': 'elements', 'Demos': 'demos'}
 backends = ['bokeh', 'matplotlib']
 
 # TEMPLATES
