@@ -107,11 +107,6 @@ class NotebookDirective(Directive):
         if not self.state.document.settings.raw_enabled:
             raise self.warning('"%s" directive disabled.' % self.name)
 
-        if 'substring' not in self.options:
-            raise Exception('Please specify substring specification.')
-        if 'end' not in self.options:
-            raise Exception('Please specify end specification.')
-
         # Process paths and directories
         project = self.arguments[0].lower()
         rst_file = os.path.abspath(self.state.document.current_source)
@@ -180,8 +175,8 @@ class NotebookDirective(Directive):
         # Parse slice
         evaluated_text = evaluate_notebook(nb_abs_path, dest_path_eval,
                                            skip_exceptions=skip_exceptions,
-                                           substring=self.options['substring'],
-                                           end = self.options['end'])
+                                           substring=self.options.get('substring'),
+                                           end = self.options.get('end'))
 
         # Insert evaluated notebook HTML into Sphinx
 
@@ -252,7 +247,8 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
         print('INFO: Skipping existing temp notebook {dest_path!s}'.format(
             dest_path=os.path.abspath(dest_path)))
 
-    ret = nb_to_html(dest_path, preprocessors=[NotebookSlice(substring, end)])
+    preprocessors = [] if substring is None else [NotebookSlice(substring, end)]
+    ret = nb_to_html(dest_path, preprocessors=preprocessors)
     return ret
 
 
