@@ -100,7 +100,7 @@ class NotebookDirective(Directive):
     required_arguments = 2
     optional_arguments = 3
     option_spec = {'skip_exceptions' : directives.flag,
-                   'substring':str, 'end':str }
+                   'substring':str, 'end':str, 'skip_execute':bool }
 
     def run(self):
         # check if raw html is supported
@@ -176,7 +176,8 @@ class NotebookDirective(Directive):
         evaluated_text = evaluate_notebook(nb_abs_path, dest_path_eval,
                                            skip_exceptions=skip_exceptions,
                                            substring=self.options.get('substring'),
-                                           end = self.options.get('end'))
+                                           end=self.options.get('end'),
+                                           skip_execute=self.options.get('skip_execute'))
 
         # Insert evaluated notebook HTML into Sphinx
 
@@ -218,7 +219,7 @@ def nb_to_html(nb_path, preprocessors=[]):
     return output
 
 def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
-                      substring=None, end=None):
+                      substring=None, end=None, skip_execute=None):
     # Create evaluated version and save it to the dest path.
     # Always use --pylab so figures appear inline
     # perhaps this is questionable?
@@ -233,7 +234,8 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
         print('INFO: Running temp notebook {dest_path!s}'.format(
             dest_path=os.path.abspath(dest_path)))
         try:
-            nb_runner.run_notebook(skip_exceptions=skip_exceptions)
+            if not skip_execute:
+                nb_runner.run_notebook(skip_exceptions=skip_exceptions)
         except NotebookError as e:
             print('')
             print(e)
@@ -242,7 +244,11 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
             return 'Notebook conversion failed with the following traceback: \n%s' % \
                 re.sub(r'\\033[\[\]]([0-9]{1,2}([;@][0-9]{0,2})*)*[mKP]?', '', str(e))
         os.chdir(cwd)
-        write(nb_runner.nb, open(dest_path, 'w'), 'json')
+
+        if skip_execute:
+            write(notebook, open(dest_path, 'w'), 'json')
+        else:
+            write(nb_runner.nb, open(dest_path, 'w'), 'json')
     else:
         print('INFO: Skipping existing temp notebook {dest_path!s}'.format(
             dest_path=os.path.abspath(dest_path)))
