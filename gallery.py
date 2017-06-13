@@ -16,15 +16,42 @@ TITLE = 'Gallery'
 gallery_conf = {'Elements': 'elements', 'Demos': 'demos'}
 backends = ['bokeh', 'matplotlib']
 
+
+
+PREFIX = """
+import holoviews
+from holoviews.plotting.widgets import NdWidget
+from holoviews.plotting.comms import Comm
+
+try:
+    import holoviews.plotting.mpl
+    holoviews.Store.renderers['matplotlib'].comms['default'] = (Comm, '')
+except:
+    pass
+
+try:
+    import holoviews.plotting.bokeh
+    holoviews.Store.renderers['bokeh'].comms['default'] = (Comm, '')
+except:
+    pass
+
+NdWidget.export_json=True
+NdWidget.json_load_path = '/json'
+NdWidget.json_save_path = './'
+
+holoviews.plotting.mpl.MPLPlot.fig_alpha = 0
+holoviews.plotting.bokeh.callbacks.Callback._comm_type = Comm
+"""
+
 # TEMPLATES
 TOC_TEMPLATE  = """
 .. toctree::
     :hidden:
-    
+
     /%s
 
-"""          
- 
+"""
+
 THUMBNAIL_TEMPLATE = """
 .. raw:: html
 
@@ -129,6 +156,7 @@ def generate_gallery(basepath):
             dest_dir = os.path.join('.', 'gallery', folder, backend)
             for f in glob.glob(path+'/*.ipynb'):
                 code = notebook_thumbnail(f, os.path.join(folder, backend))
+                code = PREFIX + code
                 retcode = execute(code.encode('utf8'))
                 basename = os.path.basename(f)
                 title = basename[:-6].replace('_', ' ').capitalize()
