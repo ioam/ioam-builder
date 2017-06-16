@@ -46,6 +46,23 @@ except ImportError:
         from IPython.nbconvert.transformers import Transformer as Preprocessor
 
 
+class SkipOutput(Preprocessor):
+    """A transformer to skip the output for cells containing a certain string"""
+
+    def __init__(self, substring=None, **kwargs):
+        self.substring = substring
+        super(SkipOutput, self).__init__(**kwargs)
+
+    def preprocess_cell(self, cell, resources, index):
+        if cell['cell_type'] == 'code':
+            if self.substring in cell['source']:
+                cell['outputs'] = []
+        return cell, resources
+
+
+    def __call__(self, nb, resources): return self.preprocess(nb,resources)
+
+
 class NotebookSlice(Preprocessor):
     """A transformer to select a slice of the cells of a notebook"""
 
@@ -98,9 +115,10 @@ class NotebookDirective(Directive):
     into html suitable for embedding in a Sphinx document.
     """
     required_arguments = 2
-    optional_arguments = 3
+    optional_arguments = 5
     option_spec = {'skip_exceptions' : directives.flag,
-                   'substring':str, 'end':str, 'skip_execute':bool }
+                   'substring':str, 'end':str,
+                   'skip_execute':bool, 'skip_output':str}
 
     def run(self):
         # check if raw html is supported
@@ -177,7 +195,8 @@ class NotebookDirective(Directive):
                                            skip_exceptions=skip_exceptions,
                                            substring=self.options.get('substring'),
                                            end=self.options.get('end'),
-                                           skip_execute=self.options.get('skip_execute'))
+                                           skip_execute=self.options.get('skip_execute'),
+                                           skip_output=self.options.get('skip_output'))
 
         # Insert evaluated notebook HTML into Sphinx
 
@@ -219,7 +238,7 @@ def nb_to_html(nb_path, preprocessors=[]):
     return output
 
 def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
-                      substring=None, end=None, skip_execute=None):
+                      substring=None, end=None, skip_execute=None, skip_output=None):
     # Create evaluated version and save it to the dest path.
     # Always use --pylab so figures appear inline
     # perhaps this is questionable?
@@ -254,6 +273,7 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
             dest_path=os.path.abspath(dest_path)))
 
     preprocessors = [] if substring is None else [NotebookSlice(substring, end)]
+    preprocessors = (preprocessors + [SkipOutput(skip_output)]) if skip_output else preprocessors
     ret = nb_to_html(dest_path, preprocessors=preprocessors)
     return ret
 
