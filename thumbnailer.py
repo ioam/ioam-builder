@@ -57,8 +57,8 @@ def notebook_thumbnail(filename, subpath):
 if __name__ == '__main__':
     files = []
     abspath = os.path.abspath(sys.argv[1])
+    split_path = abspath.split(os.path.sep)
     if os.path.isdir(abspath):
-        split_path = abspath.split(os.path.sep)
         if 'examples' not in split_path:
             print('Can only thumbnail notebooks in examples/')
             sys.exit()
@@ -66,8 +66,8 @@ if __name__ == '__main__':
         files = [os.path.join(abspath, f) for f in os.listdir(abspath)
                  if f.endswith('.ipynb')]
     elif os.path.isfile(abspath):
-        print('Please supply a directory to thumbnail, not a single notebook')
-        sys.exit()
+        subpath = os.path.sep.join(split_path[split_path.index('examples')+1:-1])
+        files=[abspath]
     else:
         print('Path {path} does not exist'.format(path=abspath))
 
