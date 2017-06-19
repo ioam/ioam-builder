@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 """
-Cleans up relative cross-notebook links by replacing them with
-.html extension. 
+Cleans up relative cross-notebook links by replacing them with .html
+extension.
 """
 
 import os
@@ -11,6 +11,11 @@ BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result':
                       '//cell.output_area.append_execute_result',
                       '}(this));\n</div>': '}(this));\n</script></div>',
                       '\n(function(global) {': '<script>\n(function(global) {'}
+
+# Fix gallery links (e.g to the element gallery)
+LINK_REPLACEMENTS = {'../../examples/elements/':'../gallery/elements/',
+                     '../../examples/demos/':'../gallery/demos/',
+                     '../../examples/streams/':'../gallery/streams/'}
 
 def cleanup_links(path):
     with open(path) as f:
@@ -22,6 +27,8 @@ def cleanup_links(path):
     for a in soup.findAll('a'):
         href = a.get('href', '')
         if '.ipynb' in href and 'http' not in href:
+            for k, v in LINK_REPLACEMENTS.items():
+                href = href.replace(k, v)
             a['href'] = href.replace('.ipynb', '.html')
     html = soup.prettify("utf-8")
     with open(path, 'w') as f:
