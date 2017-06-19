@@ -12,6 +12,9 @@ function expand(e) {
 }
 
 function expand_ref(ref) {
+	if (ref == null) {
+		return
+	}
 	while (ref.className !== 'class rm_collapsed' &&
 		   ref.parentNode !== undefined) {
 		ref = ref.parentNode;

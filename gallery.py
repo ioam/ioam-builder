@@ -178,6 +178,7 @@ def generate_gallery(basepath):
                         thumbnail='../_static/images/logo.png',
                         ref_name=basename[:-6])
                 else:
+                    print('%s thumbnail successfully generated' % basename)
                     this_entry = _thumbnail_div(dest_dir, basename, title, backend)
                 this_entry += TOC_TEMPLATE % os.path.join(dest_dir, basename[:-6])[2:].replace(os.sep, '/')
                 gallery_rst += this_entry
