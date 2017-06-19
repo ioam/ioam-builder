@@ -18,9 +18,7 @@ backends = ['bokeh', 'matplotlib']
 
 
 PREFIX = """
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import holoviews
 from holoviews.plotting.widgets import NdWidget
 from holoviews.plotting.comms import Comm
