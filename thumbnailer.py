@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os, sys, subprocess
 from nbconvert.preprocessors import Preprocessor
 
@@ -35,9 +36,9 @@ class ThumbnailProcessor(Preprocessor):
     def __call__(self, nb, resources): return self.preprocess(nb,resources)
 
 
-def execute(code):
+def execute(code, cwd):
     proc = subprocess.Popen(['python'],
-                            stdin=subprocess.PIPE)
+                            stdin=subprocess.PIPE, cwd=cwd)
     proc.communicate(code)
     return proc.returncode
 
@@ -51,7 +52,7 @@ def notebook_thumbnail(filename, subpath):
     preprocessors = [OptsMagicProcessor(),
                      OutputMagicProcessor(),
                      StripMagicsProcessor(),
-                     ThumbnailProcessor(os.path.join(dir_path, basename))]
+                     ThumbnailProcessor(os.path.abspath(os.path.join(dir_path, basename)))]
     return main(filename, preprocessors)
 
 if __name__ == '__main__':
