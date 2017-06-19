@@ -168,7 +168,7 @@ def generate_gallery(basepath):
             for f in glob.glob(path+'/*.ipynb'):
                 code = notebook_thumbnail(f, os.path.join(folder, backend))
                 code = PREFIX + code
-                retcode = execute(code.encode('utf8'))
+                retcode = execute(code.encode('utf8'), cwd=os.path.split(f)[0])
                 basename = os.path.basename(f)
                 title = basename[:-6].replace('_', ' ').capitalize()
                 dest = os.path.join(dest_dir, os.path.basename(f))
