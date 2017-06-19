@@ -13,12 +13,14 @@ except ImportError:
 
 # CONFIGURATION
 TITLE = 'Gallery'
-gallery_conf = {'Elements': 'elements', 'Demos': 'demos'}
+gallery_conf = {'Elements': 'elements', 'Demos': 'demos', 'Streams': {'path': 'streams', 'skip': True}}
 backends = ['bokeh', 'matplotlib']
 
 
-
 PREFIX = """
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import holoviews
 from holoviews.plotting.widgets import NdWidget
 from holoviews.plotting.comms import Comm
@@ -100,12 +102,14 @@ BUTTON_TEMPLATE = """
 HIDE_JS = """
 .. raw:: html
     <script>
-        $('.'+'{backend}'+'_example').hide();
+        $(document).ready(function () {{
+            $('.'+'{backend}'+'_example').hide();
+        }});
     </script>
 """
 
 
-def generate_file_rst(src_dir, backend):
+def generate_file_rst(src_dir, backend, skip):
     files = glob.glob(os.path.join(src_dir, '*.ipynb'))
     for f in files:
         basename = os.path.basename(f)
@@ -116,6 +120,8 @@ def generate_file_rst(src_dir, backend):
             rst_file.write(title+'\n')
             rst_file.write('_'*len(title)+'\n\n')
             rst_file.write(".. notebook:: %s %s" % ('holoviews', basename))
+            if skip:
+                rst_file.write('\n    :skip_execute: True\n')
             rst_file.write('\n\n-------\n\n')
             rst_file.write('`Download this notebook from GitHub (right-click to download).'
                            ' <https://raw.githubusercontent.com/ioam/holoviews/master/%s/%s>`_' % (src_dir[2:], basename))
@@ -150,6 +156,11 @@ def generate_gallery(basepath):
     gallery_rst += BUTTON_GROUP_TEMPLATE.format(buttons=''.join(buttons), backends=backends)
 
     for heading, folder in sorted(gallery_conf.items()):
+        if isinstance(folder, dict):
+            skip = folder.get('skip', False)
+            folder = folder['path']
+        else:
+            skip = False
         gallery_rst += heading + '\n' + '='*len(heading) + '\n\n'
         for backend in backends:
             path = os.path.join(basepath, 'examples', folder, backend)
@@ -172,7 +183,7 @@ def generate_gallery(basepath):
                     this_entry = _thumbnail_div(dest_dir, basename, title, backend)
                 this_entry += TOC_TEMPLATE % os.path.join(dest_dir, basename[:-6])[2:].replace(os.sep, '/')
                 gallery_rst += this_entry
-            generate_file_rst(dest_dir, backend)
+            generate_file_rst(dest_dir, backend, skip)
         # clear at the end of the section
         gallery_rst += """.. raw:: html\n\n
         <div style='clear:both'></div>\n\n"""
