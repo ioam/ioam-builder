@@ -99,6 +99,7 @@ BUTTON_TEMPLATE = """
 
 HIDE_JS = """
 .. raw:: html
+
     <script>
         $(document).ready(function () {{
             $('.'+'{backend}'+'_example').hide();
