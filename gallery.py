@@ -161,6 +161,10 @@ def generate_gallery(basepath):
         else:
             skip = False
         gallery_rst += heading + '\n' + '='*len(heading) + '\n\n'
+        asset_dir = os.path.join(basepath, 'examples', folder, 'assets')
+        if os.path.isdir(asset_dir):
+            asset_dest = os.path.join('.', 'gallery', folder, 'assets')
+            shutil.copytree(asset_dir, asset_dest)
         for backend in backends:
             path = os.path.join(basepath, 'examples', folder, backend)
             dest_dir = os.path.join('.', 'gallery', folder, backend)
