@@ -208,7 +208,7 @@ thumbnail with its default link Background color */
   padding: 5px 15px;
   position: absolute;
   z-index: 98;
-  width: 220px;
+  width: 165px;
   bottom: 52%;
 }
 .sphx-glr-thumbcontainer[tooltip]:hover:before {
