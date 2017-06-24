@@ -14,7 +14,7 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext refmanual ipynb-rst clean-ipynb-rst
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext refmanual ipynb-rst clean-ipynb-rst gallery
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -174,8 +174,6 @@ gallery:
 
 fix-links:
 	- python builder/fix_links.py _build/html
-	- mkdir ./_build/html/json
-	- find . -type f -name '*.json' -exec cp -p {} ./_build/html/json/ ";"
 
 refmanual:
 	- mkdir -p Reference_Manual
