@@ -74,7 +74,8 @@ class NotebookSlice(Preprocessor):
         super(NotebookSlice, self).__init__(**kwargs)
 
     def _find_slice(self, nbc, substring, endstr):
-        start, end = None, None
+        start = 0 if substring is None else None
+        end = None
         try:
             end = int(endstr)
             count = 0
@@ -86,17 +87,21 @@ class NotebookSlice(Preprocessor):
             if start is None and substring in source:
                 start = ind
             if None not in [start, count]:
-                if count >= end:
+                if end is not None and count >= end:
                     end = ind
                     break
                 count += 1
             elif start is not None:
-                if endstr in source:
+                if endstr is None:
+                    break
+                elif endstr in source:
                     end = ind + 1
                     break
 
-        if None in [start, end]:
-            raise Exception('Invalid notebook slice')
+        if start is None:
+            raise Exception('Invalid notebook slice start')
+        if end is None and endstr is not None:
+            raise Exception('Invalid notebook slice end string match')
 
         return (max([start,self.offset]),end)
 
@@ -275,7 +280,7 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
         print('INFO: Skipping existing temp notebook {dest_path!s}'.format(
             dest_path=os.path.abspath(dest_path)))
 
-    preprocessors = [] if substring is None else [NotebookSlice(substring, end, offset)]
+    preprocessors = [] if substring is None and not offset else [NotebookSlice(substring, end, offset)]
     preprocessors = (preprocessors + [SkipOutput(skip_output)]) if skip_output else preprocessors
     ret = nb_to_html(dest_path, preprocessors=preprocessors)
     return ret
