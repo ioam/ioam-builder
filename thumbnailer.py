@@ -8,9 +8,8 @@ from holoviews.util.command import main
 import holoviews as hv
 from holoviews import Store, Dimensioned
 
-
-import matplotlib
-matplotlib.use('agg')
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 
 def thumbnail(obj, basename):
     import os
