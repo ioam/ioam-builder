@@ -12,12 +12,15 @@ function expand(e) {
 }
 
 function expand_ref(ref) {
+	if (ref == null) {
+		return
+	}
 	while (ref.className !== 'class rm_collapsed' &&
 		   ref.parentNode !== undefined) {
 		ref = ref.parentNode;
-	}
-	if (ref == null) {
-		return
+		if (ref == null) {
+			return
+		}
 	}
 	if (ref.className == 'class rm_collapsed') {
 		ref.className = "class rm_expanded";
@@ -30,6 +33,9 @@ function expand_loc() {
 		var ref = $(loc.split('.').join('\\.'));
 		if (ref.length) {
 			expand_ref(ref[0]);
+			if (ref[0].position == null) {
+				return
+			}
 			var top = ref[0].position().top;
 			$(window).scrollTop(top);
 		}
