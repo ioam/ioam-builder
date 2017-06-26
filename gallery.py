@@ -15,10 +15,13 @@ except ImportError:
 THUMBNAIL_URL = 'http://assets.holoviews.org'
 
 # CONFIGURATION
-TITLE = 'Gallery'
-gallery_conf = {'Elements': 'elements', 'Demos': 'demos', 'Streams': {'path': 'streams', 'skip': True}}
+gallery_conf = {
+    'Gallery':   {'Demos': 'demos'},
+    'Reference': {'Containers': 'containers',
+                  'Elements': 'elements',
+                  'Streams': {'path': 'streams', 'skip': True}}
+}
 backends = ['bokeh', 'matplotlib', 'plotly']
-
 
 PREFIX = """
 # -*- coding: utf-8 -*-
@@ -141,7 +144,7 @@ def _thumbnail_div(full_dir, fname, snippet, backend):
 
 
 
-def generate_gallery(basepath):
+def generate_gallery(basepath, title, folders):
     """
     Generates a gallery for all example directories specified in
     the gallery_conf. Generates rst files for all found notebooks
@@ -149,7 +152,7 @@ def generate_gallery(basepath):
     basepath. Also generates thumbnails and an overall index.
     """
 
-    gallery_rst = TITLE + '\n' + '_'*len(TITLE)
+    gallery_rst = title + '\n' + '_'*len(title)
     buttons = []
     for n, backend in enumerate(backends):
         buttons.append(BUTTON_TEMPLATE.format(N=n+1, checked='' if n else 'checked="checked"',
@@ -157,29 +160,30 @@ def generate_gallery(basepath):
 
     gallery_rst += BUTTON_GROUP_TEMPLATE.format(buttons=''.join(buttons), backends=backends)
 
-    for heading, folder in sorted(gallery_conf.items()):
+    page = title.lower()
+    for heading, folder in sorted(folders.items()):
         if isinstance(folder, dict):
             skip = folder.get('skip', False)
             folder = folder['path']
         else:
             skip = False
         gallery_rst += heading + '\n' + '='*len(heading) + '\n\n'
-        asset_dir = os.path.join(basepath, 'examples', folder, 'assets')
-        asset_dest = os.path.join('.', 'gallery', folder, 'assets')
+        asset_dir = os.path.join(basepath, 'examples', page, folder, 'assets')
+        asset_dest = os.path.join('.', page, folder, 'assets')
         if os.path.isdir(asset_dir) and not os.path.isdir(asset_dest):
             shutil.copytree(asset_dir, asset_dest)
         for backend in backends:
-            path = os.path.join(basepath, 'examples', folder, backend)
-            dest_dir = os.path.join('.', 'gallery', folder, backend)
+            path = os.path.join(basepath, 'examples', page, folder, backend)
+            dest_dir = os.path.join('.', page, folder, backend)
             try:
                 os.makedirs(dest_dir)
             except:
                 pass
             notebooks = glob.glob(path+'/*.ipynb')
             if notebooks:
-                print("\n\nGenerating %d %s gallery examples for %s backend\n"
+                print("\n\nGenerating %d %s %s examples for %s backend\n"
                       "__________________________________________________"
-                      % (len(notebooks), heading, backend))
+                      % (len(notebooks), heading, title, backend))
             for f in notebooks:
                 # Get ipynb file and copy it to doc
                 basename = os.path.basename(f)
@@ -188,7 +192,7 @@ def generate_gallery(basepath):
 
                 shutil.copyfile(f, dest)
                 # Try to fetch thumbnail otherwise regenerate it
-                thumb_url = '/'.join([THUMBNAIL_URL, 'thumbnails', folder,
+                thumb_url = '/'.join([THUMBNAIL_URL, 'thumbnails', page, folder,
                                       backend, '%s.png' % basename[:-6]])
                 thumb = os.path.join(dest_dir, 'thumbnails',
                                      '%s.png' % basename[:-6])
@@ -197,13 +201,16 @@ def generate_gallery(basepath):
                     verb = 'Used existing'
                     retcode = 0
                 elif thumb_req.status_code == 200:
-                    verb = 'Downloaded'
+                    verb = 'Successfully downloaded'
+                    thumb_dir = os.path.dirname(thumb)
+                    if not os.path.isdir(thumb_dir):
+                        os.makedirs(thumb_dir)
                     with open(thumb, 'wb') as thumb_f:
                         thumb_f.write(thumb_req.content)
                     retcode = 0
                 else:
-                    verb = 'Generated'
-                    code = notebook_thumbnail(f, os.path.join(folder, backend))
+                    verb = 'Successfully generated'
+                    code = notebook_thumbnail(f, os.path.join(page, folder, backend))
                     code = PREFIX + code
                     retcode = execute(code.encode('utf8'), cwd=os.path.split(f)[0])
                 if retcode:
@@ -213,7 +220,7 @@ def generate_gallery(basepath):
                         thumbnail='../_static/images/logo.png',
                         ref_name=basename[:-6])
                 else:
-                    print('%s %s thumbnail successfully generated' % (verb, basename))
+                    print('%s %s thumbnail' % (verb, basename))
                     this_entry = _thumbnail_div(dest_dir, basename, title, backend)
                 this_entry += TOC_TEMPLATE % os.path.join(dest_dir, basename[:-6])[2:].replace(os.sep, '/')
                 gallery_rst += this_entry
@@ -222,10 +229,11 @@ def generate_gallery(basepath):
         gallery_rst += """.. raw:: html\n\n
         <div style='clear:both'></div>\n\n"""
     gallery_rst += HIDE_JS.format(backend=backend)
-    with open(os.path.join(basepath, 'doc', 'gallery', 'index.rst'), 'w') as f:
+    with open(os.path.join(basepath, 'doc', page, 'index.rst'), 'w') as f:
         f.write(gallery_rst)
 
 
 if __name__ == '__main__':
     basepath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    generate_gallery(basepath)
+    for title, folders in sorted(gallery_conf.items()):
+        generate_gallery(basepath, title, folders)
