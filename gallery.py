@@ -107,6 +107,7 @@ HIDE_JS = """
     </script>
 """
 
+skip_execute_nbs = ['DynamicMap.ipynb']
 
 def generate_file_rst(src_dir, backend, skip):
     files = (glob.glob(os.path.join(src_dir, '*.ipynb'))+
@@ -122,7 +123,7 @@ def generate_file_rst(src_dir, backend, skip):
             rst_file.write('_'*len(title)+'\n\n')
             if extension == 'ipynb':
                 rst_file.write(".. notebook:: %s %s" % ('holoviews', basename))
-                if skip:
+                if skip or any(basename.strip().endswith(skipped) for skipped in skip_execute_nbs):
                     rst_file.write('\n    :skip_execute: True\n')
             else:
                 rst_file.write('.. literalinclude:: %s\n\n' % basename)
