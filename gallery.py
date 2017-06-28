@@ -16,7 +16,7 @@ THUMBNAIL_URL = 'http://assets.holoviews.org'
 
 # CONFIGURATION
 gallery_conf = {
-    'Gallery':   {'Demos': 'demos'},
+    'Gallery':   {'Apps': 'apps', 'Demos': 'demos'},
     'Reference': {'Containers': 'containers',
                   'Elements': 'elements',
                   'Streams': {'path': 'streams', 'skip': True}}
@@ -47,15 +47,6 @@ NdWidget.json_save_path = './'
 
 holoviews.plotting.mpl.MPLPlot.fig_alpha = 0
 holoviews.plotting.bokeh.callbacks.Callback._comm_type = Comm
-"""
-
-# TEMPLATES
-TOC_TEMPLATE  = """
-.. toctree::
-    :hidden:
-
-    /%s
-
 """
 
 THUMBNAIL_TEMPLATE = """
@@ -108,40 +99,47 @@ HIDE_JS = """
 
     <script>
         $(document).ready(function () {{
-            $('.'+'{backend}'+'_example').hide();
+            backends = {backends};
+            for (var i=0; i<backends.length; i++){{
+                $('.'+backends[i]+'_example').hide();
+            }}
         }});
     </script>
 """
 
 
 def generate_file_rst(src_dir, backend, skip):
-    files = glob.glob(os.path.join(src_dir, '*.ipynb'))
+    files = (glob.glob(os.path.join(src_dir, '*.ipynb'))+
+             glob.glob(os.path.join(src_dir, '*.py')))
     for f in files:
+        extension = f.split('.')[-1]
         basename = os.path.basename(f)
-        rst_path = f[:-len('ipynb')].replace(' ', '_') + 'rst'
-        title = basename[:-6].replace('_', ' ').capitalize()
+        rst_path = f[:-len(extension)].replace(' ', '_') + 'rst'
+        title = basename[:-(len(extension)+1)].replace('_', ' ').capitalize()
         with open(rst_path, 'w') as rst_file:
-            rst_file.write('.. _%s_gallery_%s:\n\n' % (backend, basename[:-6]))
+            rst_file.write('.. _%s_gallery_%s:\n\n' % (backend, basename[:-(len(extension)+1)]))
             rst_file.write(title+'\n')
             rst_file.write('_'*len(title)+'\n\n')
-            rst_file.write(".. notebook:: %s %s" % ('holoviews', basename))
-            if skip:
-                rst_file.write('\n    :skip_execute: True\n')
+            if extension == 'ipynb':
+                rst_file.write(".. notebook:: %s %s" % ('holoviews', basename))
+                if skip:
+                    rst_file.write('\n    :skip_execute: True\n')
+            else:
+                rst_file.write('.. literalinclude:: %s\n\n' % basename)
             rst_file.write('\n\n-------\n\n')
             rst_file.write('`Download this notebook from GitHub (right-click to download).'
                            ' <https://raw.githubusercontent.com/ioam/holoviews/master/%s/%s>`_' % (src_dir[2:], basename))
 
-def _thumbnail_div(full_dir, fname, snippet, backend):
+def _thumbnail_div(full_dir, fname, snippet, backend, extension):
     """Generates RST to place a thumbnail in a gallery"""
     thumb = os.path.join(full_dir, 'thumbnails',
-                         '%s.png' % fname[:-6])
+                         '%s.%s' % (fname, extension))
 
     # Inside rst files forward slash defines paths
     thumb = thumb.replace(os.sep, "/")
     template = THUMBNAIL_TEMPLATE
     return template.format(snippet=escape(snippet), backend=backend,
-                           thumbnail=thumb[2:], ref_name=fname[:-6])
-
+                           thumbnail=thumb[2:], ref_name=fname)
 
 
 def generate_gallery(basepath, title, folders):
@@ -179,28 +177,32 @@ def generate_gallery(basepath, title, folders):
                 os.makedirs(dest_dir)
             except:
                 pass
-            notebooks = glob.glob(path+'/*.ipynb')
+            notebooks = glob.glob(path+'/*.ipynb') + glob.glob(path+'/*.py')
             if notebooks:
                 print("\n\nGenerating %d %s %s examples for %s backend\n"
                       "__________________________________________________"
                       % (len(notebooks), heading, title, backend))
             for f in notebooks:
                 # Get ipynb file and copy it to doc
-                basename = os.path.basename(f)
-                title = basename[:-6].replace('_', ' ').capitalize()
+                extension = f.split('.')[-1]
+                basename = os.path.basename(f)[:-(len(extension)+1)]
+                ftitle = basename.replace('_', ' ').capitalize()
                 dest = os.path.join(dest_dir, os.path.basename(f))
 
                 shutil.copyfile(f, dest)
                 # Try to fetch thumbnail otherwise regenerate it
                 thumb_url = '/'.join([THUMBNAIL_URL, 'thumbnails', page, folder,
-                                      backend, '%s.png' % basename[:-6]])
+                                      backend, '%s.png' % basename])
                 thumb = os.path.join(dest_dir, 'thumbnails',
-                                     '%s.png' % basename[:-6])
+                                     '%s.png' % basename)
                 thumb_req = requests.get(thumb_url)
+                thumb_req2 = requests.get(thumb_url[:-4]+'.gif')
                 if os.path.isfile(thumb):
+                    thumb_extension = 'png'
                     verb = 'Used existing'
                     retcode = 0
                 elif thumb_req.status_code == 200:
+                    thumb_extension = 'png'
                     verb = 'Successfully downloaded'
                     thumb_dir = os.path.dirname(thumb)
                     if not os.path.isdir(thumb_dir):
@@ -208,27 +210,41 @@ def generate_gallery(basepath, title, folders):
                     with open(thumb, 'wb') as thumb_f:
                         thumb_f.write(thumb_req.content)
                     retcode = 0
-                else:
+                elif thumb_req2.status_code == 200:
+                    thumb_extension = 'gif'
+                    verb = 'Successfully downloaded'
+                    thumb_dir = os.path.dirname(thumb)
+                    if not os.path.isdir(thumb_dir):
+                        os.makedirs(thumb_dir)
+                    with open(thumb[:-4]+'.gif', 'wb') as thumb_f:
+                        thumb_f.write(thumb_req2.content)
+                    retcode = 0
+                elif extension == 'ipynb':
+                    thumb_extension = 'png'
                     verb = 'Successfully generated'
                     code = notebook_thumbnail(f, os.path.join(page, folder, backend))
                     code = PREFIX + code
                     retcode = execute(code.encode('utf8'), cwd=os.path.split(f)[0])
+                else:
+                    retcode = 1
                 if retcode:
                     print('%s thumbnail export failed' % basename)
+                    if extension == 'py':
+                        continue
                     this_entry = THUMBNAIL_TEMPLATE.format(
-                        snippet=escape(title), backend=backend,
+                        snippet=escape(ftitle), backend=backend,
                         thumbnail='../_static/images/logo.png',
-                        ref_name=basename[:-6])
+                        ref_name=basename)
                 else:
                     print('%s %s thumbnail' % (verb, basename))
-                    this_entry = _thumbnail_div(dest_dir, basename, title, backend)
-                this_entry += TOC_TEMPLATE % os.path.join(dest_dir, basename[:-6])[2:].replace(os.sep, '/')
+                    this_entry = _thumbnail_div(dest_dir, basename, ftitle,
+                                                backend, thumb_extension)
                 gallery_rst += this_entry
             generate_file_rst(dest_dir, backend, skip)
         # clear at the end of the section
         gallery_rst += """.. raw:: html\n\n
         <div style='clear:both'></div>\n\n"""
-    gallery_rst += HIDE_JS.format(backend=backend)
+    gallery_rst += HIDE_JS.format(backends=repr(backends[1:]))
     with open(os.path.join(basepath, 'doc', page, 'index.rst'), 'w') as f:
         f.write(gallery_rst)
 
