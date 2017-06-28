@@ -4,7 +4,7 @@ from nbconvert.preprocessors import Preprocessor
 
 from holoviews.ipython.preprocessors import OptsMagicProcessor, OutputMagicProcessor
 from holoviews.ipython.preprocessors import StripMagicsProcessor, wrap_cell_expression
-from holoviews.util.command import main
+from holoviews.util.command import export_to_python
 import holoviews as hv
 from holoviews import Store, Dimensioned
 
@@ -52,7 +52,7 @@ def notebook_thumbnail(filename, subpath):
                      OutputMagicProcessor(),
                      StripMagicsProcessor(),
                      ThumbnailProcessor(os.path.abspath(os.path.join(dir_path, basename)))]
-    return main(filename, preprocessors)
+    return export_to_python(filename, preprocessors)
 
 if __name__ == '__main__':
     files = []
