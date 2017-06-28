@@ -3,9 +3,13 @@
 Cleans up relative cross-notebook links by replacing them with .html
 extension.
 """
-
 import os
+import re
 from bs4 import BeautifulSoup
+
+import holoviews as hv
+import param
+
 
 BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result':
                       '//cell.output_area.append_execute_result',
@@ -17,12 +21,40 @@ LINK_REPLACEMENTS = {'../../examples/elements/':'../gallery/elements/',
                      '../../examples/demos/':'../gallery/demos/',
                      '../../examples/streams/':'../gallery/streams/'}
 
+
+# Class names for auto-linking
+excluded_names = { 'UniformNdMapping', 'NdMapping', 'MultiDimensionalMapping',
+                   'Empty', 'CompositeOverlay', 'Collator', 'AdjointLayout'}
+dimensioned = set(param.concrete_descendents(hv.Dimensioned).keys())
+
+class_names = {'elements': set(param.concrete_descendents(hv.Element).keys()),
+               'streams': set(param.concrete_descendents(hv.streams.Stream).keys())}
+class_names['containers'] = set((dimensioned - class_names['elements']) - excluded_names)
+
+
+def component_links(text, path):
+    if ('user_guide' in path) or ('getting_started' in path):
+        for clstype, listing in class_names.items():
+            for clsname in list(listing):
+                replacement_tpl = """<a href='../reference/{clstype}/bokeh/{clsname}.html'>
+                <code>{clsname}</code></a>"""
+                replacement = replacement_tpl.format(clstype=clstype, clsname=clsname)
+                try:
+                    text, count = re.subn('<code>\s*{clsname}\s*</code>*'.format(clsname=clsname),
+                                          replacement, text)
+                except Exception as e:
+                    print(str(e))
+    return text
+
+
 def cleanup_links(path):
     with open(path) as f:
         text = f.read()
     if 'BokehJS does not appear to have successfully loaded' in text:
         for k, v in BOKEH_REPLACEMENTS.items():
             text = text.replace(k, v)
+
+    text = component_links(text, path)
     soup = BeautifulSoup(text)
     for a in soup.findAll('a'):
         href = a.get('href', '')
