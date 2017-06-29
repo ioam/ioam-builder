@@ -11,6 +11,7 @@ import holoviews as hv
 import param
 
 rx = re.compile('(.+)\d\d-(.+).ipynb')
+rx2 = re.compile('(.+)\d-(.+).ipynb')
 
 BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result':
                       '//cell.output_area.append_execute_result',
@@ -65,6 +66,9 @@ def cleanup_links(path):
             if rx.match(href):
                 parts = href.split('/')
                 a['href'] = '/'.join(parts[:-1]+[parts[-1][3:-5]+'html'])
+            elif rx2.match(href):
+                parts = href.split('/')
+                a['href'] = '/'.join(parts[:-1]+[parts[-1][2:-5]+'html'])
             else:
                 a['href'] = href.replace('.ipynb', '.html')
     html = soup.prettify("utf-8")
