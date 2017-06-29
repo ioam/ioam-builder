@@ -122,14 +122,20 @@ def generate_file_rst(src_dir, backend, skip):
             rst_file.write(title+'\n')
             rst_file.write('_'*len(title)+'\n\n')
             if extension == 'ipynb':
+                ftype = 'notebook'
                 rst_file.write(".. notebook:: %s %s" % ('holoviews', basename))
                 if skip or any(basename.strip().endswith(skipped) for skipped in skip_execute_nbs):
                     rst_file.write('\n    :skip_execute: True\n')
             else:
+                ftype = 'script'
                 rst_file.write('.. literalinclude:: %s\n\n' % basename)
+                url = 'http://assets.holoviews.org/gifs/%s/%s.gif' % (src_dir[2:], basename[:-3])
+                rst_file.write('.. figure:: %s\n\n' % url)
             rst_file.write('\n\n-------\n\n')
-            rst_file.write('`Download this notebook from GitHub (right-click to download).'
-                           ' <https://raw.githubusercontent.com/ioam/holoviews/master/%s/%s>`_' % (src_dir[2:], basename))
+            rst_file.write('`Download this %s from GitHub (right-click to download).'
+                           ' <https://raw.githubusercontent.com/ioam/holoviews/master/examples/%s/%s>`_'
+                           % (ftype, src_dir[2:], basename))
+
 
 def _thumbnail_div(full_dir, fname, snippet, backend, extension):
     """Generates RST to place a thumbnail in a gallery"""
@@ -143,12 +149,10 @@ def _thumbnail_div(full_dir, fname, snippet, backend, extension):
                            thumbnail=thumb[2:], ref_name=fname)
 
 
-# or the `Showcase <../showcase/index.html>`_
-
 REFERENCE_INTRO="""
-The gallery presents the various components made available by HoloViews
-from which you can build new visualizations. If you wish to see a
-collection of more involved examples, see the `Gallery
+The gallery presents the various components made available by
+HoloViews from which you can build new visualizations. If you wish to
+see a collection of more involved examples, see the `Gallery
 <../gallery/index.html>`_. To get started with HoloViews, see our
 `Getting Started <../getting_started/index.html>`_ guide and for more
 detailed documentation our `User Guide <../user_guide/index.html>`_.
@@ -156,9 +160,9 @@ detailed documentation our `User Guide <../user_guide/index.html>`_.
 
 GALLERY_INTRO="""
 The gallery shows the breadth of what HoloViews is capable of with a
-varied collection of examples. If you are looking for a specific
+varied collection of examples.  If you are looking for a specific
 component (or wish to view the available range of primitives), see our
-`Reference Gallery <../reference/index.html>`_.  To get started with
+`Reference Gallery <../reference/index.html>`_. To get started with
 HoloViews, see our `Getting Started <../getting_started/index.html>`_
 guide and for more detailed documentation our `User Guide
 <../user_guide/index.html>`_.
