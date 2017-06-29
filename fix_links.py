@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import holoviews as hv
 import param
 
+rx = re.compile('(.+)\d\d-(.+).ipynb')
 
 BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result':
                       '//cell.output_area.append_execute_result',
@@ -61,7 +62,11 @@ def cleanup_links(path):
         if '.ipynb' in href and 'http' not in href:
             for k, v in LINK_REPLACEMENTS.items():
                 href = href.replace(k, v)
-            a['href'] = href.replace('.ipynb', '.html')
+            if rx.match(href):
+                parts = href.split('/')
+                a['href'] = '/'.join(parts[:-1]+[parts[-1][3:-5]+'html'])
+            else:
+                a['href'] = href.replace('.ipynb', '.html')
     html = soup.prettify("utf-8")
     with open(path, 'w') as f:
         f.write(html)
