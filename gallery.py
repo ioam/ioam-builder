@@ -143,25 +143,25 @@ def _thumbnail_div(full_dir, fname, snippet, backend, extension):
                            thumbnail=thumb[2:], ref_name=fname)
 
 
+# or the `Showcase <../showcase/index.html>`_
 
 REFERENCE_INTRO="""
 The gallery presents the various components made available by HoloViews
 from which you can build new visualizations. If you wish to see a
 collection of more involved examples, see the `Gallery
-<../gallery/index.html>`_ or the `Showcase <../showcase/index.html>`_.
- To get started with HoloViews, see our
+<../gallery/index.html>`_. To get started with HoloViews, see our
 `Getting Started <../getting_started/index.html>`_ guide and for more
 detailed documentation our `User Guide <../user_guide/index.html>`_.
 """
 
 GALLERY_INTRO="""
 The gallery shows the breadth of what HoloViews is capable of with a
-varied collection of examples, or visit the `Showcase <../showcase/index.html>`_.
-If you are looking for a specific component (or wish to view the
-available range of primitives), see our `Reference Gallery
-<../reference/index.html>`_.  To get started with HoloViews, see our
-`Getting Started <../getting_started/index.html>`_ guide and for more
-detailed documentation our `User Guide <../user_guide/index.html>`_.
+varied collection of examples. If you are looking for a specific
+component (or wish to view the available range of primitives), see our
+`Reference Gallery <../reference/index.html>`_.  To get started with
+HoloViews, see our `Getting Started <../getting_started/index.html>`_
+guide and for more detailed documentation our `User Guide
+<../user_guide/index.html>`_.
 """
 
 INTRO_PARAGRAPH = {'Reference': REFERENCE_INTRO, 'Gallery': GALLERY_INTRO}
