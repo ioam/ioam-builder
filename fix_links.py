@@ -10,8 +10,8 @@ from bs4 import BeautifulSoup
 import holoviews as hv
 import param
 
-rx = re.compile('(.+)\d\d-(.+).ipynb')
-rx2 = re.compile('(.+)\d-(.+).ipynb')
+rx = re.compile('(.*)\d\d-(.+).ipynb')
+rx2 = re.compile('(.*)\d-(.+).ipynb')
 
 BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result':
                       '//cell.output_area.append_execute_result',
