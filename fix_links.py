@@ -24,26 +24,49 @@ LINK_REPLACEMENTS = {'../../examples/elements/':'../gallery/elements/',
                      '../../examples/streams/':'../gallery/streams/'}
 
 
-# Class names for auto-linking
-excluded_names = { 'UniformNdMapping', 'NdMapping', 'MultiDimensionalMapping',
-                   'Empty', 'CompositeOverlay', 'Collator', 'AdjointLayout'}
-dimensioned = set(param.concrete_descendents(hv.Dimensioned).keys())
+def filter_available(names, name_type):
+    available = []
+    for name in names:
+        reference_dir = os.path.abspath(os.path.join(__file__, '..','..', '..',
+                                                     'examples', 'reference'))
+        if not os.path.isdir(reference_dir):
+            raise Exception('Cannot find examples/reference in %r' % reference_dir)
 
-class_names = {'elements': set(param.concrete_descendents(hv.Element).keys()),
-               'streams': set(param.concrete_descendents(hv.streams.Stream).keys())}
-class_names['containers'] = set((dimensioned - class_names['elements']) - excluded_names)
+        for backend in ['bokeh', 'matplotlib', 'plotly']:
+            candidate = os.path.join(reference_dir, name_type, backend, name+'.ipynb')
+            if os.path.isfile(candidate):
+                replacement_tpl = """<a href='../reference/{clstype}/{backend}/{clsname}.html'>
+                <code>{clsname}</code></a>"""
+                replacement = replacement_tpl.format(clstype=name_type,
+                                                     clsname=name,
+                                                     backend=backend)
+                available.append((name, replacement))
+                break
+    return available
 
+
+def find_autolinkable():
+    # Class names for auto-linking
+    excluded_names = { 'UniformNdMapping', 'NdMapping', 'MultiDimensionalMapping',
+                       'Empty', 'CompositeOverlay', 'Collator', 'AdjointLayout'}
+    dimensioned = set(param.concrete_descendents(hv.Dimensioned).keys())
+
+    all_elements = set(param.concrete_descendents(hv.Element).keys())
+    all_streams = set(param.concrete_descendents(hv.streams.Stream).keys())
+    all_containers = set((dimensioned - all_elements) - excluded_names)
+    return {'elements':   filter_available(all_elements, 'elements'),
+            'streams':    filter_available(all_streams, 'streams'),
+            'containers': filter_available(all_containers, 'containers')}
+
+
+autolinkable = find_autolinkable()
 
 def component_links(text, path):
     if ('user_guide' in path) or ('getting_started' in path):
-        for clstype, listing in class_names.items():
-            for clsname in list(listing):
-                replacement_tpl = """<a href='../reference/{clstype}/bokeh/{clsname}.html'>
-                <code>{clsname}</code></a>"""
-                replacement = replacement_tpl.format(clstype=clstype, clsname=clsname)
+        for clstype, listing in autolinkable.items():
+            for (clsname, replacement) in list(listing):
                 try:
-                    text, count = re.subn('<code>\s*{clsname}\s*</code>*'.format(clsname=clsname),
-                                          replacement, text)
+                    text, count = re.subn('<code>\s*{clsname}\s*</code>*'.format(clsname=clsname),replacement, text)
                 except Exception as e:
                     print(str(e))
     return text
