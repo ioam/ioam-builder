@@ -35,9 +35,9 @@ class ThumbnailProcessor(Preprocessor):
     def __call__(self, nb, resources): return self.preprocess(nb,resources)
 
 
-def execute(code, cwd):
+def execute(code, cwd, env):
     proc = subprocess.Popen(['python'],
-                            stdin=subprocess.PIPE, cwd=cwd)
+                            stdin=subprocess.PIPE, cwd=cwd, env=env)
     proc.communicate(code)
     return proc.returncode
 
