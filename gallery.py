@@ -17,7 +17,7 @@ THUMBNAIL_URL = 'http://assets.holoviews.org'
 # CONFIGURATION
 gallery_conf = {
     'Gallery':   {'Apps': 'apps', 'Demos': 'demos'},
-    'Reference': {'Containers': 'containers',
+    'Reference': {'Apps': 'apps', 'Containers': 'containers',
                   'Elements': 'elements',
                   'Streams': {'path': 'streams', 'skip': True}}
 }
@@ -117,6 +117,8 @@ def generate_file_rst(src_dir, backend, skip):
         basename = os.path.basename(f)
         rst_path = f[:-len(extension)].replace(' ', '_') + 'rst'
         title = basename[:-(len(extension)+1)].replace('_', ' ').capitalize()
+        if os.path.isfile(rst_path):
+            continue
         with open(rst_path, 'w') as rst_file:
             rst_file.write('.. _%s_gallery_%s:\n\n' % (backend, basename[:-(len(extension)+1)]))
             rst_file.write(title+'\n')
