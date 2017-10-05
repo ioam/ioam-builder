@@ -33,8 +33,9 @@ from docutils.parsers.rst import directives
 from IPython.nbconvert import html, python
 from IPython.nbformat.current import read, write
 from runipy.notebook_runner import NotebookRunner, NotebookError
-from test_notebooks import run_notebook_test
 
+NotebookRunner.MIME_MAP['application/vnd.bokehjs_load.v0+json'] = 'html'
+NotebookRunner.MIME_MAP['application/vnd.bokehjs_exec.v0+json'] = 'html'
 
 try:
     from nbconvert.preprocessors import Preprocessor
@@ -145,16 +146,6 @@ class NotebookDirective(Directive):
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
 
-        # Run notebook tests
-        filepath, filename = os.path.split(__file__)
-        ref_dir = os.path.abspath(os.path.join(filepath, '..', 'reference_data'))
-        test_dir = os.path.abspath(os.path.join(filepath, '..', 'test_data'))
-
-        retcode = run_notebook_test(nb_abs_path, project, "test", ref_dir, test_dir)
-
-        if retcode:
-            raise RuntimeError("%s does not pass test. Please fix the notebook"
-                               "or update the reference data." % nb_basename)
         # Process file inclusion options
         include_opts = self.arguments[2:]
         include_nb = True if 'ipynb' in include_opts else False
