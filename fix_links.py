@@ -13,10 +13,9 @@ import param
 rx = re.compile('(.*)\d\d-(.+).ipynb')
 rx2 = re.compile('(.*)\d-(.+).ipynb')
 
-BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result':
-                      '//cell.output_area.append_execute_result',
-                      '}(this));\n</div>': '}(this));\n</script></div>',
-                      '\n(function(global) {': '<script>\n(function(global) {'}
+BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result': '//cell.output_area.append_execute_result',
+                      '}(window));\n</div>': '}(window));\n</script></div>',
+                      '\n(function(root) {': '<script>\n(function(root) {'}
 
 # Fix gallery links (e.g to the element gallery)
 LINK_REPLACEMENTS = {'../../examples/elements/':'../gallery/elements/',
@@ -75,6 +74,7 @@ def component_links(text, path):
 def cleanup_links(path):
     with open(path) as f:
         text = f.read()
+
     if 'BokehJS does not appear to have successfully loaded' in text:
         for k, v in BOKEH_REPLACEMENTS.items():
             text = text.replace(k, v)
@@ -94,10 +94,9 @@ def cleanup_links(path):
                 a['href'] = '/'.join(parts[:-1]+[parts[-1][2:-5]+'html'])
             else:
                 a['href'] = href.replace('.ipynb', '.html')
-    html = soup.prettify("utf-8")
+    html = soup.prettify("utf-8").decode('utf-8')
     with open(path, 'w') as f:
         f.write(html)
-
 
 if __name__ == '__main__':
     import argparse
@@ -109,7 +108,4 @@ if __name__ == '__main__':
     for root, dirs, files in os.walk(args.build_dir):
         for file_path in files:
             if file_path.endswith(".html"):
-                try:
-                    soup = cleanup_links(os.path.join(root, file_path))
-                except:
-                    pass
+                soup = cleanup_links(os.path.join(root, file_path))
