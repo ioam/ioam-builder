@@ -256,7 +256,10 @@ def generate_gallery(basepath, title, folders):
                     verb = 'Successfully generated'
                     code = notebook_thumbnail(f, os.path.join(page, folder, backend))
                     code = PREFIX + code
-                    retcode = execute(code.encode('utf8'), cwd=os.path.split(f)[0])
+                    my_env = os.environ.copy()
+                    doc_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+                    my_env["PYTHONPATH"] = doc_path + ':' + my_env["PYTHONPATH"]
+                    retcode = execute(code.encode('utf8'), env=my_env, cwd=os.path.split(f)[0])
                 else:
                     retcode = 1
                 if retcode:
