@@ -487,3 +487,8 @@ dl.dl-horizontal {
 .alert-danger .alert-link {
   color: #843534;
 }
+
+/* Avoid wrapping in HoloViews extension logo block */
+div.logo-block {
+	display: inline-block;
+}
