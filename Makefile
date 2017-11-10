@@ -51,9 +51,9 @@ html:
 	@mkdir -p ./_build/html/json
 # TODO deal with this later!
 #	@find . -type f -name '*.json' -path "./_build" -prune -exec mv {} ./_build/html/json/ ";"
-	@find ../examples -type f -name '*.json' -exec mv {} ./_build/html/json/ ";"
-#	@find ./reference -type f -name '*.json' -exec mv {} ./_build/html/json/ ";"
-#	@find ./gallery -type f -name '*.json' -exec mv {} ./_build/html/json/ ";"
+	-find ../examples -type f -name '*.json' -exec mv {} ./_build/html/json/ ";"
+	-find ./reference -type f -name '*.json' -exec mv {} ./_build/html/json/ ";"
+	-find ./gallery -type f -name '*.json' -exec mv {} ./_build/html/json/ ";"
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
