@@ -41,9 +41,9 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/html/*
 	-rm -rf $(BUILDDIR)/doctrees
+	-rm -f  $(BUILDDIR)/html/*temp_evaluated.ipynb
 
 html:
-	-rm -f  $(BUILDDIR)/html/*temp_evaluated.ipynb
 	mkdir -p ./_static
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
