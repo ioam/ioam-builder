@@ -16,10 +16,10 @@ THUMBNAIL_URL = 'http://assets.holoviews.org'
 
 # CONFIGURATION
 gallery_conf = {
-    'Gallery':   {'Apps': 'apps', 'Demos': 'demos'},
-    'Reference': {'Apps': 'apps', 'Containers': 'containers',
-                  'Elements': 'elements',
-                  'Streams': {'path': 'streams', 'skip': True}}
+    'Gallery':   {'Apps': 'apps', 'Notebooks': 'notebooks'},
+#    'Reference': {'Apps': 'apps', 'Containers': 'containers',
+#                  'Elements': 'elements',
+#                  'Streams': {'path': 'streams', 'skip': True}}
 }
 backends = ['bokeh', 'matplotlib', 'plotly']
 
@@ -233,7 +233,7 @@ def generate_gallery(basepath, title, folders):
                     thumb_extension = 'png'
                     verb = 'Used existing'
                     retcode = 0
-                elif thumb_req.status_code == 200:
+                elif False and thumb_req.status_code == 200:
                     thumb_extension = 'png'
                     verb = 'Successfully downloaded'
                     thumb_dir = os.path.dirname(thumb)
@@ -242,7 +242,7 @@ def generate_gallery(basepath, title, folders):
                     with open(thumb, 'wb') as thumb_f:
                         thumb_f.write(thumb_req.content)
                     retcode = 0
-                elif thumb_req2.status_code == 200:
+                elif False and thumb_req2.status_code == 200:
                     thumb_extension = 'gif'
                     verb = 'Successfully downloaded'
                     thumb_dir = os.path.dirname(thumb)

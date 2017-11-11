@@ -28,8 +28,8 @@ def filter_available(names, name_type):
     for name in names:
         reference_dir = os.path.abspath(os.path.join(__file__, '..','..', '..',
                                                      'examples', 'reference'))
-        if not os.path.isdir(reference_dir):
-            raise Exception('Cannot find examples/reference in %r' % reference_dir)
+#        if not os.path.isdir(reference_dir):
+#            raise Exception('Cannot find examples/reference in %r' % reference_dir)
 
         for backend in ['bokeh', 'matplotlib', 'plotly']:
             candidate = os.path.join(reference_dir, name_type, backend, name+'.ipynb')
