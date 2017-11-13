@@ -161,15 +161,15 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
-publish-ipynb:
-	python nbpublisher/nbpublish.py $(MODULE)
+#publish-ipynb:
+#	python nbpublish.py $(MODULE)
 
-buildbot-publish-ipynb:
-	python nbpublisher/nbpublish.py $(MODULE) NO_PROMPT
-	@echo "Committed static notebooks to IOAM."
+#buildbot-publish-ipynb:
+#	python nbpublisher/nbpublish.py $(MODULE) NO_PROMPT
+#	@echo "Committed static notebooks to IOAM."
 
 ipynb-rst:
-	python nbpublisher/nbpagebuild.py
+	python builder/nbpagebuild.py
 	@echo "Created RST for documented notebooks."
 
 gallery:

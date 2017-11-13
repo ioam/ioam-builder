@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 import requests
-from nbpublisher.thumbnailer import notebook_thumbnail, execute
+from builder.thumbnailer import notebook_thumbnail, execute
 
 # Try Python 3 first, otherwise load from Python 2
 try:
