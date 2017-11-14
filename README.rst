@@ -21,6 +21,8 @@ Installation
 
 2. Add ioam builder as submodule of your project at `doc/builder`.
 
+3. Install theme: ``cd doc/builder/ioam_theme && python setup.py install``
+   
 3. At this point you should be able to build site (see usage, below).
 
 
