@@ -19,6 +19,8 @@ Installation
 
 1. Add sphinx to your project in `doc/`
 
+2. Edit PROJECT and MODULE in doc/Makefile
+   
 2. Add ioam builder as submodule of your project at `doc/builder`.
 
 3. Install theme: ``cd doc/builder/ioam_theme && python setup.py install``
@@ -42,6 +44,7 @@ Usage
 
 1. export PYTHONPATH=$PWD/doc
 2. cd doc
+3. make ipynb-rst (optional: commit result and skip step in future)
 3. (optional) make gallery
 4. (optional) make refmanual
 5. make html
@@ -92,6 +95,8 @@ something
 
 nbpagebuild.py
 ______________
+
+Generates rst containers for all notebooks in examples/
 
 
 generate_modules.py
