@@ -23,7 +23,21 @@ Installation
    
 2. Add ioam builder as submodule of your project at `doc/builder`.
 
+0. ``conda env create --file doc/builder/docenv.yml`` (TODO: conda package coming
+   instead)
+
 3. Install theme: ``cd doc/builder/ioam_theme && python setup.py install``
+
+3. 
+   
+3. FAQ.rst
+   getting_started/index.rst
+   user_guide/index.rst
+   index.rst
+   about.rst
+   latest_news.html
+   Reference_Manual/index.rst
+
    
 3. At this point you should be able to build site (see usage, below).
 
