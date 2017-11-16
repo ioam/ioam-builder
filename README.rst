@@ -29,6 +29,10 @@ Installation
 3. Install theme: ``cd doc/builder/ioam_theme && python setup.py install``
 
 3. 
+
+3. grep for holoviews
+
+3. grep for project
    
 3. FAQ.rst
    getting_started/index.rst
