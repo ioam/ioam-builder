@@ -15,21 +15,32 @@ Installation
   * You have user guide notebooks in examples/user_guide
     
   * You have gallery notebooks in examples/gallery
+  
+1. Add ioam-builder as submodule of your project at `doc/builder`::
 
+    git submodule add -b tmphvdocs git@github.com:ioam/ioam-builder doc/builder
 
-1. Add sphinx to your project in `doc/`
-
-2. Edit PROJECT and MODULE in doc/Makefile
-   
-2. Add ioam builder as submodule of your project at `doc/builder`.
-
-0. ``conda env create --file doc/builder/docenv.yml`` (TODO: conda package coming
+2. TODO ``conda env create --file doc/builder/docenv.yml`` (TODO: conda package coming
    instead)
 
-3. Install theme: ``cd doc/builder/ioam_theme && python setup.py install``
+3. To get template pages to start from/if you don't already have rst to start from, ``cp doc/builder/tmplate/*.rst doc/`` and ``cp doc/builder/tmplate/*.html doc/``
 
-3. 
+4. If you don't already have sphinx Makefile, ``cp doc/builder/tmplate/Makefile doc/`` and edit PROJECT and MODULE in doc/Makefile
 
+5. If you don't already have sphinx conf.py, ``cp doc/builder/tmplate/conf.py doc/`` and edit stuff in it.
+   
+6. Install theme: ``cd doc/builder/ioam_theme && python setup.py install && cd ../../..``
+
+7. TODO ``export PYTHONPATH=$PWD/doc``
+
+8. ``cd doc``, then::
+
+    TODO don't try this at home yet: make gallery
+    TODO don't try this at home yet: make refmanual
+    make ipynb-rst
+    make html
+    make fix-links
+  
 3. grep for holoviews
 
 3. grep for project
@@ -45,6 +56,8 @@ Installation
    
 3. At this point you should be able to build site (see usage, below).
 
+0. Add .travis gh pages chunk
+   
 
 Extras
 ------
