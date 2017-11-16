@@ -169,7 +169,7 @@ doctest:
 #	@echo "Committed static notebooks to IOAM."
 
 ipynb-rst:
-	python builder/nbpagebuild.py
+	python builder/nbpagebuild.py $(PROJECT)
 	@echo "Created RST for documented notebooks."
 
 gallery:

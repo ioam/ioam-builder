@@ -1,9 +1,12 @@
 """
 Auto-generates the rst files corresponding to the Notebooks in examples/
+
+used by a makefile but you could try python builder/nbpagebuild.py yourprojname
 """
 import os
 import glob
 import re
+import sys
 
 # TODO: only ok while submodule following organization rules
 examples_path = os.path.abspath(
@@ -13,7 +16,7 @@ doc_path = os.path.abspath(
     os.path.join(__file__, '..','..', '..','doc'))
 
 # TODO: hardcoded!
-project = 'holoviews'
+project = sys.argv[1]
 
 print("Making rst for %s and putting them %s"%(examples_path,doc_path))
 
