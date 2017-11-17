@@ -34,8 +34,9 @@ from IPython.nbconvert import html, python
 from IPython.nbformat.current import read, write
 from runipy.notebook_runner import NotebookRunner, NotebookError
 
-NotebookRunner.MIME_MAP['application/vnd.bokehjs_load.v0+json'] = 'html'
-NotebookRunner.MIME_MAP['application/vnd.bokehjs_exec.v0+json'] = 'html'
+import nbconvert
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 
 try:
     from nbconvert.preprocessors import Preprocessor
@@ -235,26 +236,34 @@ def nb_to_html(nb_path, preprocessors=[]):
     output, resources = exporter.from_filename(nb_path)
     return output
 
-def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
-                      substring=None, end=None, skip_execute=None,
-                      skip_output=None, offset=0):
-    # Create evaluated version and save it to the dest path.
-    # Always use --pylab so figures appear inline
-    # perhaps this is questionable?
-    notebook = read(open(nb_path), 'json')
+
+# TODO: (does it matter) have lost profile_dir
+# TODO: (does it matter) have lost NotebookRunner.MIME_MAP['application/vnd.bokehjs_load.v0+json'] = 'html'
+# TODO: (does it matter) have lost NotebookRunner.MIME_MAP['application/vnd.bokehjs_exec.v0+json'] = 'html'
+def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,substring=None, end=None, skip_execute=None,skip_output=None, offset=0):
+
+    notebook = nbformat.read(nb_path, as_version=4)
+    # TODO: allow config? except hope to replace whole file...
+    kwargs = dict(timeout=300,
+                  allow_errors=False,
+                  # or sys.version_info[1] ?
+                  kernel_name='python',
+                  allow_exceptions=skip_exceptions)
+
     cwd = os.getcwd()
     filedir, filename = os.path.split(nb_path)
     os.chdir(filedir)
     profile_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profile_docs')
-    nb_runner = NotebookRunner(notebook, pylab=False, profile_dir=profile_dir)
+    print("Ignoring %s...hope that's ok"%profile_dir)
+    not_nb_runner = ExecutePreprocessor(**kwargs)    
 
     if not os.path.isfile(dest_path):
         print('INFO: Running temp notebook {dest_path!s}'.format(
             dest_path=os.path.abspath(dest_path)))
         try:
             if not skip_execute:
-                nb_runner.run_notebook(skip_exceptions=skip_exceptions)
-        except NotebookError as e:
+                not_nb_runner.preprocess(notebook,{})
+        except CellExecutionError as e:
             print('')
             print(e)
             # Return the traceback, filtering out ANSI color codes.
@@ -266,7 +275,11 @@ def evaluate_notebook(nb_path, dest_path=None, skip_exceptions=False,
         if skip_execute:
             write(notebook, open(dest_path, 'w'), 'json')
         else:
-            write(nb_runner.nb, open(dest_path, 'w'), 'json')
+            ne = nbconvert.NotebookExporter()
+            newnb, _ = ne.from_notebook_node(notebook)
+            with open(dest_path,'w') as f:
+                f.write(newnb)
+            
     else:
         print('INFO: Skipping existing temp notebook {dest_path!s}'.format(
             dest_path=os.path.abspath(dest_path)))
