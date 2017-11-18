@@ -10,17 +10,20 @@ from bs4 import BeautifulSoup
 import holoviews as hv
 import param
 
+# TODO: holoviews specific links e.g. to reference manual...doc & generalize
+
+# TODO: such a regex appears in at least one other place in ioam-builder...
 rx = re.compile('(.*)\d\d-(.+).ipynb')
 rx2 = re.compile('(.*)\d-(.+).ipynb')
 
-BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result': '//cell.output_area.append_execute_result',
-                      '}(window));\n</div>': '}(window));\n</script></div>',
-                      '\n(function(root) {': '<script>\n(function(root) {'}
+#BOKEH_REPLACEMENTS = {'cell.output_area.append_execute_result': '//cell.output_area.append_execute_result',
+#                      '}(window));\n</div>': '}(window));\n</script></div>',
+#                      '\n(function(root) {': '<script>\n(function(root) {'}
 
 # Fix gallery links (e.g to the element gallery)
-LINK_REPLACEMENTS = {'../../examples/elements/':'../gallery/elements/',
-                     '../../examples/demos/':'../gallery/demos/',
-                     '../../examples/streams/':'../gallery/streams/'}
+#LINK_REPLACEMENTS = {'../../examples/elements/':'../gallery/elements/',
+#                     '../../examples/demos/':'../gallery/demos/',
+#                     '../../examples/streams/':'../gallery/streams/'}
 
 
 def filter_available(names, name_type):
@@ -75,17 +78,17 @@ def cleanup_links(path):
     with open(path) as f:
         text = f.read()
 
-    if 'BokehJS does not appear to have successfully loaded' in text:
-        for k, v in BOKEH_REPLACEMENTS.items():
-            text = text.replace(k, v)
+#    if 'BokehJS does not appear to have successfully loaded' in text:
+#        for k, v in BOKEH_REPLACEMENTS.items():
+#            text = text.replace(k, v)
 
     text = component_links(text, path)
     soup = BeautifulSoup(text)
     for a in soup.findAll('a'):
         href = a.get('href', '')
         if '.ipynb' in href and 'http' not in href:
-            for k, v in LINK_REPLACEMENTS.items():
-                href = href.replace(k, v)
+ #           for k, v in LINK_REPLACEMENTS.items():
+ #               href = href.replace(k, v)
             if rx.match(href):
                 parts = href.split('/')
                 a['href'] = '/'.join(parts[:-1]+[parts[-1][3:-5]+'html'])
