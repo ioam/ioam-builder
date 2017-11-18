@@ -48,7 +48,6 @@ welcome to chat with the developers on `gitter
    <hr width='100%'></hr>
 	 
    <div>
-   <!--
    <div >
      <a href="http://holoviews.org/gallery/demos/bokeh/iris_splom_example.html">
        <img src="http://holoviews.org/_images/iris_splom_example.png" width='20%'>    </img> </a>
@@ -76,7 +75,6 @@ welcome to chat with the developers on `gitter
        <a href="http://holoviews.org/gallery/apps/bokeh/nytaxi_hover.html">
          <img src="http://assets.holoviews.org/collage/ny_datashader.gif" width='31%'> </a>
    </div>
-   -->
    </div>
    <!--   <hr width='100%'></hr> -->
 

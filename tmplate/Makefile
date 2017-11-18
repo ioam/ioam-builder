@@ -1,8 +1,8 @@
 # Makefile for Sphinx documentation
 #
 
-PROJECT = 'project'
-MODULE = 'project'
+PROJECT = 'holoviews'
+MODULE = 'holoviews'
 
 include ./builder/Makefile 
 export
