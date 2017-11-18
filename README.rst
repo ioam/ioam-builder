@@ -28,9 +28,13 @@ Installation
 4. If you don't already have sphinx Makefile, ``cp doc/builder/tmplate/Makefile doc/`` and edit PROJECT and MODULE in doc/Makefile
 
 5. If you don't already have sphinx conf.py, ``cp doc/builder/tmplate/conf.py doc/`` and edit stuff in it.
+
+6. Edit doc/index.rst toctree to match pages in conf.py
+
+7. git add FAQ.rst Makefile about.rst conf.py index.rst latest_news.html
    
 6. Install theme: ``cd doc/builder/ioam_theme && python setup.py install && cd ../../..``
-
+   
 7. TODO ``export PYTHONPATH=$PWD/doc``
 
 8. ``cd doc``, then::
@@ -38,9 +42,21 @@ Installation
     TODO don't try this at home yet: make gallery
     TODO don't try this at home yet: make refmanual
     make ipynb-rst
+
+9. Now ``cp doc/builder/tmplate/user_guide/index.rst user_guide`` and edit, or make your own
+   Then commit to repo
+
+10. Now ``cp doc/builder/tmplate/getting_started/index.rst getting_started`` and edit, or make your own
+    Then commit to repo
+
+11. grep for holoviews and project, replace as appropriate
+
+9.    
     make html
     make fix-links
-  
+
+9. pushd _build/html && python -m http.server
+
 3. grep for holoviews
 
 3. grep for project
