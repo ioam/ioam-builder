@@ -54,6 +54,15 @@ Limitations
 """
 
 import sys, os, pickle, shutil, time, fnmatch, json, operator
+from functools import wraps
+import errno
+import signal
+
+if sys.version_info.major == 3:
+    basestring = str
+else:
+    basestring = basestring
+
 import itertools
 try:
     from StringIO import StringIO
@@ -131,6 +140,26 @@ DISPLAY_LINES_IGNORE = [
 
 TYPE_IGNORE = [SVG, HTML]
 
+class TimeoutError(Exception):
+    pass
+
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator
 
 def get_all_json(teststr):
     """
@@ -174,6 +203,29 @@ def cleanup_json(obj, delete=[]):
                for k, v in obj.items()
                if k not in delete}
     return obj
+
+
+@timeout(5)
+def get_diff(ref, test):
+    import deepdiff
+    return ("Display output mismatch: %s"
+            % [deepdiff.DeepDiff(r, t)
+               for r, t in zip(ref, test)])[:1000]
+
+def get_diff_msg(ref, test):
+    if not ref:
+        return 'Display output mismatch: reference data empty'
+    elif not test:
+        return 'Display output mismatch: test data empty'
+
+    try:
+        import deepdiff
+        msg = get_diff(ref, test)
+    except TimeoutError:
+        msg = 'Display output mismatch: deepdiff comparison timed out'
+    except ImportError:
+        msg = 'Display output mismatch: deepdiff required to display JSON diff'
+    return msg
 
 
 BOKEH_IGNORE = ['id', 'notebook_comms_target', 'docid',
@@ -232,7 +284,7 @@ class Capture(object):
         output.
         """
         def capture_hook(obj, pprinter, cycles):
-            self.object_data = obj if obj != '' else None
+            self.object_data = None if isinstance(obj, basestring) and obj == '' else obj
             info = (self.counter['code'], self.code_cell_count,
                     ' reference ' if self.reference else ' ', self.name)
             pprinter.text("[Code cell %d/%d] Captured%sdata from '%s' notebook" % info)
@@ -498,13 +550,7 @@ class Configure(object):
                     test_data = cleanup_json(json_test_data, BOKEH_IGNORE)
                     test_data = [list(d.values())[0] for d in test_data if d]
                 if json_ref_data or json_test_data:
-                    try:
-                        import deepdiff
-                        msg = ("Display output mismatch: %s"
-                               % [deepdiff.DeepDiff(test_data[i], ref_data[i])
-                                  for i in range(len(ref_data))])[:1000]
-                    except:
-                        msg = 'deepdiff required to display JSON diff'
+                    msg = get_diff_msg(json_ref_data, json_test_data)
                 else:
                     msg = ("Display output mismatch: '%s...' != '%s...'"
                            % (test_data[:50], ref_data[:50]))
