@@ -104,7 +104,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
 try:    import external  # noqa (Needed for imports)
 except: pass
 
-from holoviews import ipython
+from holoviews import ipython, Store
 from holoviews.ipython import magics
 
 try:
@@ -118,6 +118,22 @@ except:
     coverage = None
 
 from nose.plugins.skip import SkipTest
+
+def render(obj, **kwargs):
+    info = ipython.display_hooks.process_object(obj)
+    if info:
+        IPython.display.display(IPython.display.HTML(info))
+        return
+
+    backend = Store.current_backend
+    if type(obj) not in Store.registry[backend]:
+        return None
+
+    if ipython.display_hooks.render_anim is not None:
+        return ipython.display_hooks.render_anim(obj)
+
+    renderer = Store.renderers[backend]
+    return renderer.html(obj, **kwargs)
 
 
 CLEANUP_DATA = False # Whether to delete the generated test data when complete
@@ -264,6 +280,8 @@ class Capture(object):
         prompt = '_%d' % (self.counter['code'] + 2)
         obj = self.shell.user_ns.get(prompt, None)
         # Necessary in case the extension is reloaded
+        ipython.display_hooks.render = render
+        ipython.display_hooks.element_display = ipython.display_hooks.display_hook(render)
         ipython.display_hooks.display_widgets = ipython.display_hooks.middle_frame
         ipython.display_hooks.render_anim = ipython.display_hooks.middle_frame
         self.shell.display_formatter.format(obj)[0]['text/plain']
