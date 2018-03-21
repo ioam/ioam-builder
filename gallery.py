@@ -12,7 +12,7 @@ except ImportError:
     from xml.sax.saxutils import escape
     escape = partial(escape, entities={'"': '&quot;'})
 
-THUMBNAIL_URL = 'http://assets.holoviews.org'
+THUMBNAIL_URL = 'https://assets.holoviews.org'
 
 # CONFIGURATION
 gallery_conf = {
@@ -131,7 +131,7 @@ def generate_file_rst(src_dir, backend, skip):
             else:
                 ftype = 'script'
                 rst_file.write('.. literalinclude:: %s\n\n' % basename)
-                url = 'http://assets.holoviews.org/gifs/%s/%s.gif' % (src_dir[2:], basename[:-3])
+                url = 'https://assets.holoviews.org/gifs/%s/%s.gif' % (src_dir[2:], basename[:-3])
                 rst_file.write('.. figure:: %s\n\n' % url)
             rst_file.write('\n\n-------\n\n')
             rst_file.write('`Download this %s from GitHub (right-click to download).'
