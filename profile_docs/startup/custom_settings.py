@@ -11,9 +11,6 @@ import holoviews.plotting.mpl
 
 warnings.filterwarnings("ignore")
 
-ip = get_ipython()  # pyflakes:ignore (IPython namespace)
-ip.extension_manager.load_extension('holoviews.ipython')
-
 from holoviews.plotting.widgets import NdWidget
 from holoviews.plotting.comms import Comm
 
