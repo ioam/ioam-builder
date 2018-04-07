@@ -105,6 +105,7 @@ try:    import external  # noqa (Needed for imports)
 except: pass
 
 from holoviews import ipython, Store
+from holoviews.core import LabelledData, UniformNdMapping
 from holoviews.ipython import magics
 
 try:
@@ -123,14 +124,15 @@ def render(obj, **kwargs):
     info = ipython.display_hooks.process_object(obj)
     if info:
         IPython.display.display(IPython.display.HTML(info))
-        return
+        return None
 
     backend = Store.current_backend
-    if type(obj) not in Store.registry[backend]:
+    if not isinstance(obj, UniformNdMapping) and type(obj) not in Store.registry[backend]:
         return None
 
     if ipython.display_hooks.render_anim is not None:
-        return ipython.display_hooks.render_anim(obj)
+        data = ipython.display_hooks.render_anim(obj)
+        return data if data is None else data['text/html']
 
     renderer = Store.renderers[backend]
     return renderer.html(obj, **kwargs)
@@ -274,15 +276,16 @@ class Capture(object):
         stderr/stdout and all display hooks (including
         sys.displayhook!)
         """
+        Store._display_hooks = {}
+
         self.object_data = None
         self.display_data = None
 
         prompt = '_%d' % (self.counter['code'] + 2)
         obj = self.shell.user_ns.get(prompt, None)
         # Necessary in case the extension is reloaded
+
         ipython.display_hooks.render = render
-        ipython.display_hooks.element_display = ipython.display_hooks.display_hook(render)
-        ipython.display_hooks.display_widgets = ipython.display_hooks.middle_frame
         ipython.display_hooks.render_anim = ipython.display_hooks.middle_frame
         self.shell.display_formatter.format(obj)[0]['text/plain']
         # Only set if bool and no captured via displayhook
@@ -305,7 +308,7 @@ class Capture(object):
             self.object_data = None if isinstance(obj, basestring) and obj == '' else obj
             info = (self.counter['code'], self.code_cell_count,
                     ' reference ' if self.reference else ' ', self.name)
-            pprinter.text("[Code cell %d/%d] Captured%sdata from '%s' notebook" % info)
+            #sys.stderr.write("[Code cell %d/%d] Captured%sdata from '%s' notebook" % info)
             self.display_data = None
             clear_output()
         return capture_hook
@@ -318,10 +321,11 @@ class Capture(object):
         """
         def capture_hook(obj, pprinter, cycles):
             self.object_data = obj
-            self.display_data = display_hook(obj)
+            display_data = display_hook(obj)
+            self.display_data = display_data
             info = (self.counter['code'], self.code_cell_count,
                     ' reference ' if self.reference else ' ', self.name)
-            pprinter.text("[%d/%d] Captured%sdisplay from '%s' notebook" % info)
+            #sys.stderr.write("[%d/%d] Captured%sdisplay from '%s' notebook" % info)
             clear_output()
         return capture_hook
 
@@ -336,6 +340,9 @@ class Capture(object):
         """
         Patch the IPython display hooks to capture raw object data and display.
         """
+        Store._display_hooks = {}
+        self.shell.display_formatter.formatters['text/html'].for_type(LabelledData, render)
+
         # Patch normal pretty-printing to grab those objects.
         plain_formatter = self.shell.display_formatter.formatters['text/plain']
         plain_printers = dict((tp, self.empty_hook(tp))
@@ -734,4 +741,7 @@ if __name__ == '__main__':
     """
     import nose
     project = sys.argv[1]
-    nose.runmodule(argv=[__file__, '--with-coverage', '--cover-package=%s' % project])
+    try:
+        nose.runmodule(argv=[__file__, '--with-coverage', '--cover-package=%s' % project])
+    except SystemExit:
+        pass
