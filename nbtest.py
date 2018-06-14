@@ -107,6 +107,7 @@ except: pass
 from holoviews import ipython, Store
 from holoviews.core import LabelledData, UniformNdMapping
 from holoviews.ipython import magics
+from holoviews.util.settings import OutputSettings
 
 try:
     from topo.analysis import TopoIPTestCase as IPTestCase
@@ -133,6 +134,10 @@ def render(obj, **kwargs):
     if ipython.display_hooks.render_anim is not None:
         data = ipython.display_hooks.render_anim(obj)
         return data if data is None else data['text/html']
+
+    filename = OutputSettings.options['filename']
+    if filename:
+        Store.renderers[backend].save(obj, filename)
 
     renderer = Store.renderers[backend]
     return renderer.html(obj, **kwargs)
