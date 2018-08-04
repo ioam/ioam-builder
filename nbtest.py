@@ -105,7 +105,7 @@ try:    import external  # noqa (Needed for imports)
 except: pass
 
 from holoviews import ipython, Store
-from holoviews.core import LabelledData, UniformNdMapping
+from holoviews.core import Dimensioned, UniformNdMapping
 from holoviews.ipython import magics
 from holoviews.util.settings import OutputSettings
 
@@ -131,15 +131,15 @@ def render(obj, **kwargs):
     if not isinstance(obj, UniformNdMapping) and type(obj) not in Store.registry[backend]:
         return None
 
+    filename = OutputSettings.options['filename']
+    renderer = Store.renderers[backend]
+    if filename:
+        renderer.save(obj, filename)
+
     if ipython.display_hooks.render_anim is not None:
         data = ipython.display_hooks.render_anim(obj)
         return data if data is None else data['text/html']
 
-    filename = OutputSettings.options['filename']
-    if filename:
-        Store.renderers[backend].save(obj, filename)
-
-    renderer = Store.renderers[backend]
     return renderer.html(obj, **kwargs)
 
 
@@ -346,7 +346,7 @@ class Capture(object):
         Patch the IPython display hooks to capture raw object data and display.
         """
         Store._display_hooks = {}
-        self.shell.display_formatter.formatters['text/html'].for_type(LabelledData, render)
+        self.shell.display_formatter.formatters['text/html'].for_type(Dimensioned, render)
 
         # Patch normal pretty-printing to grab those objects.
         plain_formatter = self.shell.display_formatter.formatters['text/plain']
