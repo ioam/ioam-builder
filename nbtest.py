@@ -96,6 +96,7 @@ pyplot.switch_backend('agg')
 
 # Monkey patch id function in bokeh to ensure deterministic results
 import bokeh
+import bokeh.util.serialization
 _count = 0
 def make_id():
     global _count
