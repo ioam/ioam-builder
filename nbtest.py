@@ -94,6 +94,15 @@ except:
 from matplotlib import pyplot
 pyplot.switch_backend('agg')
 
+# Monkey patch id function in bokeh to ensure deterministic results
+import bokeh
+_count = 0
+def make_id():
+    global _count
+    _count += 1
+    return _count
+bokeh.util.serialization.make_globally_unique_id = make_id
+
 import IPython
 from IPython import get_ipython
 from IPython.display import clear_output, SVG, HTML
@@ -103,6 +112,7 @@ from IPython.nbformat import current
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
 try:    import external  # noqa (Needed for imports)
 except: pass
+
 
 from holoviews import ipython, Store
 from holoviews.core import Dimensioned, UniformNdMapping
