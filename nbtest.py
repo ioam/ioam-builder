@@ -107,7 +107,7 @@ bokeh.util.serialization.make_globally_unique_id = make_id
 import IPython
 from IPython import get_ipython
 from IPython.display import clear_output, SVG, HTML
-from IPython.nbformat import current
+from nbformat import current
 
 # Dataviews is required. This is only a temporary fix.
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '..', '..', '..')))
