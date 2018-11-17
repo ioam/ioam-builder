@@ -113,6 +113,8 @@ def run_notebook_test(notebook, project, suite, ref_dir, test_dir, regen=False):
     if regen and os.path.isdir(ref_dir):  shutil.rmtree(ref_dir)
     ncomparisons = sum(len(glob.glob(os.path.join(ref_dir, '*.%s' % ft)))
                        for ft in ['pkl', 'html'])
+    
+    print(notebook, ncomparisons, ref_dir, test_dir, py_version, glob.glob(os.path.join(ref_dir, '..')))
     if not regen and ncomparisons == 0:
         return 0
     cmds = ['ipython', test_script, project, notebook, ref_dir, test_dir, str(regen)]
