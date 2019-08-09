@@ -1,18 +1,18 @@
 # Example of how to change the default imagen video format via profile
 
-import holoviews # noqa (API import)
-import numpy     # noqa (API import)
 import warnings
 
+import holoviews # noqa (API import)
+import numpy     # noqa (API import)
 import matplotlib as mpl
+import holoviews.plotting.mpl # noqa (API import)
+
+from panel import config
+from pyviz_comms import Comm
+
 mpl.use('agg')
 
-import holoviews.plotting.mpl
-
 warnings.filterwarnings("ignore")
-
-from holoviews.plotting.widgets import NdWidget
-from pyviz_comms import Comm
 
 try:
     import holoviews.plotting.mpl
@@ -26,8 +26,9 @@ try:
 except:
     pass
 
-NdWidget.export_json=True
-NdWidget.json_load_path = '/json'
-NdWidget.json_save_path = './'
+config.embed = True
+config.embed_json = True
+config.embed_load_path = '/json'
+config.embed_save_path = './'
 
 holoviews.plotting.mpl.MPLPlot.fig_alpha = 0
